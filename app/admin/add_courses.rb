@@ -1,8 +1,7 @@
 ActiveAdmin.register AddCourse do
   menu parent: 'Add-ons', label: 'Course Adds'
 
-  permit_params :student_id, :course_id, :department_id, :year, :semester, :status, :section_id, :preferred_section_id,
-                :credit_hour, :ects
+  permit_params :student_id, :course_id, :department_id, :year, :semester, :status, :section_id, :credit_hour, :ects
 
   filter :student
   filter :department_id, as: :search_select_filter, url: proc { admin_departments_path },
@@ -73,9 +72,6 @@ ActiveAdmin.register AddCourse do
     column 'Section', sortable: true do |c|
       c.section&.section_full_name
     end
-    column 'Preferred Section' do |c|
-      c.preferred_section&.section_full_name
-    end
     column 'Semester to' do |c|
       c.semester
     end
@@ -118,7 +114,6 @@ ActiveAdmin.register AddCourse do
           attributes_table_for add_course do
             row('Department to') { |c| c.department.department_name }
             row('Section') { |c| c.section&.section_full_name }
-            row('Preferred Section') { |c| c.preferred_section&.section_full_name }
             row('Semester to') { |c| c.semester }
             row('Year to') { |c| c.year }
             row('Status') { |c| status_tag c.status }
@@ -151,10 +146,6 @@ ActiveAdmin.register AddCourse do
       f.input :ects, input_html: { disabled: true }
       f.input :year, input_html: { disabled: true }
       f.input :semester, input_html: { disabled: true }
-      f.input :preferred_section_id, as: :search_select, url: admin_sections_path,
-                                     fields: %i[section_full_name id], display_name: 'section_full_name', minimum_input_length: 2,
-                                     order_by: 'id_asc', label: 'Preferred Section (requested)',
-                                     input_html: { allow_blank: true }
       f.input :status, as: :select, collection: AddCourse.statuses.keys, include_blank: false
     end
     f.actions

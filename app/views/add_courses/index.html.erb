@@ -144,7 +144,6 @@
             <th>Ects</th>
             <th>Credit Hour</th>
             <th>Deaprtment</th>
-            <th>Preferred Section</th>
             <th>Status</th>
 
           </tr>
@@ -159,17 +158,7 @@
               <td><%= course.course.ects %> </td>
               <td><%= course.course.credit_hour %> </td>  
               <td><%= course.department.department_name %> </td>  
-              <td>
-                <% allowed_sections = Section.where(program_id: current_student.program_id, year: course.year, semester: course.semester, batch: current_student.batch) %>
-                <% if course.preferred_section_id.present? %>
-                  <%= Section.find(course.preferred_section_id)&.section_full_name rescue '-' %>
-                <% else %>
-                  <%= form_with url: set_preferred_section_add_course_path(course.id), method: :patch, local: true do |f| %>
-                    <%= select_tag :section_id, options_from_collection_for_select(allowed_sections, :id, :section_full_name), prompt: 'Select preferred section', class: 'form-control form-control-sm d-inline-block', style: 'width: auto;' %>
-                    <%= f.submit 'Save', class: 'btn btn-sm btn-primary ml-2' %>
-                  <% end %>
-                <% end %>
-              </td>
+        
 
             </tr>
           <%end%>
