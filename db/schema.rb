@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_20_062013) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_20_070500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -1314,6 +1314,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_20_062013) do
     t.string "dean_approval_status", default: "pending"
     t.string "instructor_submit_status", default: "not_submitted"
     t.string "instructor_name"
+    t.boolean "attended_class", default: true, null: false
     t.index ["course_id"], name: "index_student_grades_on_course_id"
     t.index ["course_registration_id"], name: "index_student_grades_on_course_registration_id"
     t.index ["department_id"], name: "index_student_grades_on_department_id"

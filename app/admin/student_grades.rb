@@ -1,7 +1,8 @@
 ActiveAdmin.register StudentGrade do
     menu parent: 'Grade'
     permit_params :dean_approval_status, :instructor_submit_status, :instructor_name, :dean_head_name, :department_approval, :department_head_name, :department_head_date_of_response, :course_registration_id,
-                  :student_id, :letter_grade, :grade_point, :assesment_total, :grade_point, :course_id, assessments_attributes: %i[id student_grade_id assessment_plan_id student_id course_id result created_by updated_by _destroy]
+                  :student_id, :letter_grade, :grade_point, :assesment_total, :grade_point, :course_id, :attended_class,
+                  assessments_attributes: %i[id student_grade_id assessment_plan_id student_id course_id result created_by updated_by _destroy]
 
     # Remove default action items so we can fully control visibility
     config.clear_action_items!
@@ -33,6 +34,7 @@ ActiveAdmin.register StudentGrade do
           redirect_back(fallback_location: admin_student_grades_path, alert: 'Edit is disabled: grade already submitted.')
         end
       end
+
     end
 
      active_admin_import validate: true,
@@ -55,6 +57,31 @@ ActiveAdmin.register StudentGrade do
       @student_grade = StudentGrade.find(params[:id])
       @student_grade.generate_grade
       redirect_back(fallback_location: admin_student_grade_path)
+    end
+
+    # Toggle attendance from the show page button
+    member_action :toggle_attendance, method: :put do
+      record = resource
+      submitted = record.instructor_submit_status.to_s.downcase == 'submitted'
+
+      # Block toggling for submitted grades for all roles
+      if submitted
+        redirect_back(fallback_location: admin_student_grades_path, alert: 'Attendance cannot be changed: grade already submitted.') and return
+      end
+
+      new_value = !(record.attended_class == true)
+      if new_value == false
+        # Mark as absent: will set I/0 via model callback
+        record.update(attended_class: false)
+        notice_msg = 'Marked as absent. Grade set to I (0).'
+      else
+        # Mark as attended: recalc grade
+        record.update(attended_class: true)
+        record.generate_grade
+        notice_msg = 'Marked as attended. Grade recalculated.'
+      end
+
+      redirect_back(fallback_location: admin_student_grade_path(record), notice: notice_msg)
     end
     # action_item :update, only: :show do
     #   link_to 'Generate Grade', generate_grade_admin_student_grade_path(student_grade.id), method: :put, data: { confirm: 'Are you sure?' }
@@ -120,6 +147,9 @@ ActiveAdmin.register StudentGrade do
       column :letter_grade
       column :grade_point
       column :assesment_total
+      column :attended_class do |c|
+        status_tag(c.attended_class ? 'attended' : 'absent')
+      end
       column :department_approval do |c|
         status_tag c.department_approval
       end
@@ -134,18 +164,18 @@ ActiveAdmin.register StudentGrade do
       end
       actions defaults: false do |sg|
         # Always show View
-        item 'View', admin_student_grade_path(sg)
+        item 'View |', admin_student_grade_path(sg)
 
         submitted = sg.instructor_submit_status.to_s.downcase == 'submitted'
 
         # Show Edit only if not submitted and authorized
         if !submitted && authorized?(:update, sg)
-          item 'Edit', edit_admin_student_grade_path(sg)
+          item 'Edit |', edit_admin_student_grade_path(sg)
         end
 
         # Show Delete only if not submitted and authorized
         if !submitted && authorized?(:destroy, sg)
-          item 'Delete', admin_student_grade_path(sg), method: :delete, data: { confirm: 'Are you sure?' }
+          item 'Delete |', admin_student_grade_path(sg), method: :delete, data: { confirm: 'Are you sure?' }
         end
       end
     end
@@ -212,6 +242,7 @@ ActiveAdmin.register StudentGrade do
       if (current_admin_user.role == 'instructor') || (current_admin_user.role == 'admin')
         inputs 'Student Assessment' do
           f.input :updated_by, as: :hidden, input_html: { value: current_admin_user.name.full }
+          f.input :attended_class, as: :boolean, label: 'Student attended class', input_html: { checked: f.object.new_record? ? true : f.object.attended_class }
           table(class: 'form-table') do
             tr do
               th 'Assessment Plan', class: 'form-table__col'
@@ -276,6 +307,19 @@ ActiveAdmin.register StudentGrade do
       end
     end
 
+    # Show page button to toggle attendance
+    action_item :toggle_attendance, only: :show, priority: 2 do
+      submitted = student_grade.instructor_submit_status.to_s.downcase == 'submitted'
+      # Hide when submitted for all roles
+      if authorized?(:update, student_grade) && !submitted
+        if student_grade.attended_class
+          link_to 'Mark Absent', toggle_attendance_admin_student_grade_path(student_grade), method: :put, data: { confirm: 'Mark this student as absent? This will set grade to I (0).' }
+        else
+          link_to 'Mark Attended', toggle_attendance_admin_student_grade_path(student_grade), method: :put, data: { confirm: 'Mark this student as attended and recalculate grade?' }
+        end
+      end
+    end
+
     show title: proc { |student| student.student.full_name } do
       columns do
         column do
@@ -313,6 +357,9 @@ ActiveAdmin.register StudentGrade do
               row :letter_grade
               row :grade_point
               row :assesment_total
+              row :attended_class do |c|
+                status_tag(c.attended_class ? 'attended' : 'absent')
+              end
               row :instructor_submit_status do |c|
                 status_tag c.instructor_submit_status
               end

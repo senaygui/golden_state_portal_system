@@ -7,6 +7,9 @@ class StudentGrade < ApplicationRecord
   end
   attr_accessor :skip_assessment_total_calc
 
+  # If a student did not attend class, force Incomplete (I) and 0 grade point
+  before_save :apply_attendance_effect
+
   after_save :update_subtotal, unless: -> { skip_assessment_total_calc }
   after_commit :generate_grade
   # after_save :add_course_registration
@@ -101,6 +104,8 @@ class StudentGrade < ApplicationRecord
   end
 
   def generate_grade
+    # Do not auto-generate if attendance is marked as not attended
+    return if respond_to?(:attended_class) && attended_class == false
     return unless assessments.any?
 
     if course.credit_hour > 0
@@ -144,6 +149,15 @@ class StudentGrade < ApplicationRecord
   # end
 
   private
+
+  # When attendance is explicitly marked as not attended, force grade to I/0.
+  # This will also update updated_at, allowing the existing rake task to flip to F after 7 days.
+  def apply_attendance_effect
+    if attributes.key?("attended_class") && (attended_class == false)
+      self.letter_grade = 'I'
+      self.grade_point = 0
+    end
+  end
 
   def update_grade_report
     if course_registration.semester_registration.grade_report.present?
