@@ -184,6 +184,7 @@ class Ability
       can :manage, Invoice
     when 'registrar head'
       # can :manage, Assessment
+      can :manage, StudentRequestSetting
       can :manage, AddCourse
       can :manage, Dropcourse
       can :read, UneditableCurriculum

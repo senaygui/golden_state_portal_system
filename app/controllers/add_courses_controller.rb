@@ -1,4 +1,5 @@
 class AddCoursesController < ApplicationController
+  before_action :authenticate_student!, only: [:set_preferred_section]
   before_action :ensure_add_course_allowed!, only: [:index]
   def index
     #@next_courses = []
@@ -19,6 +20,34 @@ class AddCoursesController < ApplicationController
       @allowed_credit_hour = 13 - current_total_credit_hour
     elsif current_student.admission_type == "regular" && current_student.study_level == "graduate"
       @allowed_credit_hour = 12 - current_total_credit_hour
+    end
+  end
+
+  # PATCH /add_courses/:id/preferred_section
+  def set_preferred_section
+    add_course = AddCourse.find(params[:id])
+    unless add_course.student_id == current_student.id
+      return redirect_to add_courses_path, alert: 'Not authorized'
+    end
+
+    unless add_course.approved?
+      return redirect_to add_courses_path, alert: 'Only approved requests can set a preferred section.'
+    end
+
+    section = Section.find_by(id: params[:section_id])
+    return redirect_to add_courses_path, alert: 'Invalid section selected.' if section.nil?
+
+    allowed = section.program_id == current_student.program_id &&
+              section.year == add_course.year &&
+              section.semester == add_course.semester &&
+              section.batch.to_s == current_student.batch.to_s
+
+    return redirect_to add_courses_path, alert: 'Selected section is not available for you.' unless allowed
+
+    if add_course.update(preferred_section_id: section.id)
+      redirect_to add_courses_path, notice: 'Preferred section saved.'
+    else
+      redirect_to add_courses_path, alert: 'Could not save preferred section.'
     end
   end
 
