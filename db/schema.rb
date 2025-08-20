@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_20_115900) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_20_120010) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -899,6 +899,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_20_115900) do
     t.datetime "updated_at", precision: nil, null: false
     t.boolean "verified"
     t.string "receipt"
+    t.datetime "approval_min", precision: nil
     t.index ["academic_calendar_id"], name: "index_makeup_exams_on_academic_calendar_id"
     t.index ["assessment_id"], name: "index_makeup_exams_on_assessment_id"
     t.index ["course_id"], name: "index_makeup_exams_on_course_id"

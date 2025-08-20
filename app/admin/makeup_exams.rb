@@ -1,7 +1,7 @@
 ActiveAdmin.register MakeupExam do
   menu parent: 'Add-ons'
   permit_params :updated_by, :created_by, :section_id, :academic_calendar_id, :student_id, :course_id, :section_id,
-                :semester, :previous_result_total, :previous_letter_grade, :current_result_total, :current_letter_grade, :reason, :instructor_approval, :instructor_name, :instructor_date_of_response, :registrar_approval, :registrar_name, :registrar_date_of_response, :dean_approval, :dean_name, :dean_date_of_response, :department_approval, :department_head_name, :department_head_date_of_response, :academic_affair_approval, :academic_affair_name, :academic_affair_date_of_response, :course_registration_id, :student_grade_id, :assessment_id, :add_mark, :course_section_id, :program_id, :department_id, :year, :attachment, :receipt
+                :semester, :previous_result_total, :previous_letter_grade, :current_result_total, :current_letter_grade, :reason, :instructor_approval, :instructor_name, :instructor_date_of_response, :registrar_approval, :registrar_name, :registrar_date_of_response, :dean_approval, :dean_name, :dean_date_of_response, :department_approval, :department_head_name, :department_head_date_of_response, :academic_affair_approval, :academic_affair_name, :academic_affair_date_of_response, :course_registration_id, :student_grade_id, :assessment_id, :add_mark, :course_section_id, :program_id, :department_id, :year, :attachment, :receipt, :approval_min
 
   controller do
     def scoped_collection
@@ -147,6 +147,7 @@ ActiveAdmin.register MakeupExam do
     column 'Department' do |pd|
       pd.department.department_name
     end
+    column :approval_min
     column 'Created At', sortable: true do |c|
       c.created_at.strftime('%b %d, %Y')
     end
@@ -190,6 +191,7 @@ ActiveAdmin.register MakeupExam do
   filter :updated_at
   filter :created_by
   filter :updated_by
+  filter :approval_min
 
   form do |f|
     f.semantic_errors
@@ -222,6 +224,9 @@ ActiveAdmin.register MakeupExam do
           f.input :department_approval, as: :select, collection: %w[pending approved denied], include_blank: false
           f.input :department_head_name, as: :hidden, input_html: { value: current_admin_user.name.full }
           f.input :department_head_date_of_response, as: :hidden, input_html: { value: Time.zone.now }
+        end
+        if current_admin_user.role == 'department head'
+          f.input :approval_min, as: :date_time_picker, label: 'Approval Minimum (datetime)'
         end
         # if (current_admin_user.role == 'registrar head') || (current_admin_user.role == 'admin')
         #   f.input :registrar_approval, as: :select, collection: %w[pending approved denied], include_blank: false
@@ -333,6 +338,7 @@ ActiveAdmin.register MakeupExam do
             end
             row :department_head_name
             row :department_head_date_of_response
+            row :approval_min
             # row :registrar_approval do |c|
             #   status_tag c.registrar_approval
             # end
