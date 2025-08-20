@@ -23,7 +23,11 @@
         <div class="card">
           <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h3 class="card-title">Grade Change Requests</h3>
-            <%= link_to 'New Request', new_grade_change_path(grade_id: params[:grade_id]), class: 'btn btn-danger text-white' %>
+            <% if StudentRequestSetting.current.allow_grade_change %>
+              <%= link_to 'New Request', new_grade_change_path(grade_id: params[:grade_id]), class: 'btn btn-danger text-white' %>
+            <% else %>
+              <button class="btn btn-secondary" disabled title="Grade change requests are currently disabled by admin">New Request</button>
+            <% end %>
           </div>
           <div class="card-body">
             <% if @grade_changes.any? %>

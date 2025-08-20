@@ -24,7 +24,11 @@
           <div class="card-header bg-primary text-white d-flex align-items-center">
             <h3 class="card-title mb-0">Makeup Exam Requests</h3>
             <div class="ml-auto">
-              <%= link_to 'New Request', new_makeup_exam_path, class: 'btn btn-danger text-white' %>
+              <% if StudentRequestSetting.current.allow_makeup_exam %>
+                <%= link_to 'New Request', new_makeup_exam_path, class: 'btn btn-danger text-white' %>
+              <% else %>
+                <button class="btn btn-secondary" disabled title="Makeup exam requests are currently disabled by admin">New Request</button>
+              <% end %>
             </div>
           </div>
           <div class="card-body">

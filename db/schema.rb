@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_10_182545) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_20_062013) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -1319,6 +1319,15 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_10_182545) do
     t.index ["department_id"], name: "index_student_grades_on_department_id"
     t.index ["program_id"], name: "index_student_grades_on_program_id"
     t.index ["student_id"], name: "index_student_grades_on_student_id"
+  end
+
+  create_table "student_request_settings", force: :cascade do |t|
+    t.boolean "allow_grade_change", default: true, null: false
+    t.boolean "allow_makeup_exam", default: true, null: false
+    t.boolean "allow_add_course", default: true, null: false
+    t.boolean "allow_drop_course", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "students", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

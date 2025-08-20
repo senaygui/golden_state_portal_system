@@ -1,4 +1,5 @@
 class GradeChangesController < ApplicationController
+  before_action :ensure_grade_change_allowed!, only: [:new, :create]
   def index
     @grade_changes = GradeChange.where(student_id: current_student)
   end
@@ -63,5 +64,11 @@ class GradeChangesController < ApplicationController
   def grade_change_params
     params.require(:grade_change).permit(:reason, :course_id, :program_id, :department_id, :semester, :year,
                                          :previous_result_total, :previous_letter_grade, :student_grade_id, :assessment_id)
+  end
+
+  def ensure_grade_change_allowed!
+    unless StudentRequestSetting.current.allow_grade_change
+      redirect_to grade_changes_path, alert: 'Grade change requests are currently disabled.'
+    end
   end
 end

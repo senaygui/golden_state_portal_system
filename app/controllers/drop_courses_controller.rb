@@ -1,4 +1,5 @@
 class DropCoursesController < ApplicationController
+  before_action :ensure_drop_course_allowed!, only: [:index, :add_course_drop, :withdraw_course]
   def index
     current_semester_registration = current_student.semester_registrations.find_by(semester: current_student.semester, year: current_student.year)
     @courses = CourseRegistration.where(student: current_student, enrollment_status: 'enrolled', semester: current_student.semester, semester_registration_id: current_semester_registration).includes(:course)
@@ -37,4 +38,11 @@ class DropCoursesController < ApplicationController
     end
   end
 
+  private
+
+  def ensure_drop_course_allowed!
+    unless StudentRequestSetting.current.allow_drop_course
+      redirect_to root_path, alert: 'Drop course requests are currently disabled.'
+    end
+  end
 end

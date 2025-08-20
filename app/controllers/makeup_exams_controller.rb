@@ -1,5 +1,6 @@
 class MakeupExamsController < ApplicationController
   before_action :authenticate_student!
+  before_action :ensure_makeup_exam_allowed!, only: [:new, :create]
 
   def index
     @makeup_exams = MakeupExam.where(student: current_student).order(created_at: :desc)
@@ -127,6 +128,12 @@ class MakeupExamsController < ApplicationController
       redirect_to new_payment_path(payment), notice: 'Please complete the payment for your makeup exam.'
     else
       redirect_to root_path, alert: 'There was an issue creating the payment. Please try again.'
+    end
+  end
+
+  def ensure_makeup_exam_allowed!
+    unless StudentRequestSetting.current.allow_makeup_exam
+      redirect_to makeup_exams_path, alert: 'Makeup exam requests are currently disabled.'
     end
   end
 end

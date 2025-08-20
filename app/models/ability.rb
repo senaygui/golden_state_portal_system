@@ -98,6 +98,7 @@ class Ability
       # can :manage, GradeRule
       can :manage, Grade
       can :manage, AdminUser
+      can :manage, StudentRequestSetting
       can :manage, ActiveAdmin::Page, name: 'InstructorReport', namespace_name: 'admin'
       can :manage, ActiveAdmin::Page, name: 'Dashboard', namespace_name: 'admin'
       can :manage, ActiveAdmin::Page, name: 'StudentStats', namespace_name: 'admin'

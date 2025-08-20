@@ -1,4 +1,5 @@
 class AddCoursesController < ApplicationController
+  before_action :ensure_add_course_allowed!, only: [:index]
   def index
     #@next_courses = []
     #@added_courses = []
@@ -12,12 +13,20 @@ class AddCoursesController < ApplicationController
     @added_courses = AddCourse.approved.where(student_id: current_student.id).includes(:course).includes(:department)
     #@added_courses + @next_courses
     current_total_credit_hour = CourseRegistration.where(student: current_student, semester: current_student.semester, year: current_student.year).includes(:course).active_yes.sum {|c| c.course.credit_hour}
-    if current_student.admission_type == 'regular' && current_student.study_level="undergraduate"
+    if current_student.admission_type == 'regular' && current_student.study_level == "undergraduate"
       @allowed_credit_hour = 22 - current_total_credit_hour
-    elsif current_student.admission_type == 'extension' && current_student.study_level = "undergraduate"
+    elsif current_student.admission_type == 'extension' && current_student.study_level == "undergraduate"
       @allowed_credit_hour = 13 - current_total_credit_hour
-    elsif current_student.admission_type == "regular" && current_student.study_level = "graduate"
+    elsif current_student.admission_type == "regular" && current_student.study_level == "graduate"
       @allowed_credit_hour = 12 - current_total_credit_hour
+    end
+  end
+
+  private
+
+  def ensure_add_course_allowed!
+    unless StudentRequestSetting.current.allow_add_course
+      redirect_to root_path, alert: 'Add course requests are currently disabled.'
     end
   end
 end

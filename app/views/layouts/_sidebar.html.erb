@@ -118,9 +118,16 @@
         </li>
         <!-- Grade Changes -->
         <li class="nav-item">
-          <%= link_to grade_changes_path, class: "nav-link #{current_class?(grade_changes_path)}", style: "color: #c2c7d0; transition: all 0.3s;" do %>
-            <i class="nav-icon fas fa-exchange-alt" style="color: #adb5bd;"></i>
-            <p>Grade Changes</p>
+          <% if StudentRequestSetting.current.allow_grade_change %>
+            <%= link_to grade_changes_path, class: "nav-link #{current_class?(grade_changes_path)}", style: "color: #c2c7d0; transition: all 0.3s;" do %>
+              <i class="nav-icon fas fa-exchange-alt" style="color: #adb5bd;"></i>
+              <p>Grade Changes</p>
+            <% end %>
+          <% else %>
+            <a href="#" class="nav-link disabled" style="color: #6c757d; cursor: not-allowed;" title="Disabled by admin">
+              <i class="nav-icon fas fa-exchange-alt" style="color: #6c757d;"></i>
+              <p>Grade Changes</p>
+            </a>
           <% end %>
         </li>
         <!-- Add or Drop -->
@@ -134,24 +141,45 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="<%= add_courses_path %>" class="nav-link <%= current_class?(add_courses_path) %>" style="color: #c2c7d0; transition: all 0.3s;">
-                <i class="nav-icon fas fa-plus" style="color: #adb5bd;"></i>
-                <p>Add Course</p>
-              </a>
+              <% if StudentRequestSetting.current.allow_add_course %>
+                <a href="<%= add_courses_path %>" class="nav-link <%= current_class?(add_courses_path) %>" style="color: #c2c7d0; transition: all 0.3s;">
+                  <i class="nav-icon fas fa-plus" style="color: #adb5bd;"></i>
+                  <p>Add Course</p>
+                </a>
+              <% else %>
+                <a href="#" class="nav-link disabled" style="color: #6c757d; cursor: not-allowed;" title="Disabled by admin">
+                  <i class="nav-icon fas fa-plus" style="color: #6c757d;"></i>
+                  <p>Add Course</p>
+                </a>
+              <% end %>
             </li>
             <li class="nav-item">
-              <a href="<%= drop_courses_path %>" class="nav-link <%= current_class?(drop_courses_path) %>" style="color: #c2c7d0; transition: all 0.3s;">
-                <i class="nav-icon fas fa-folder-minus" style="color: #adb5bd;"></i>
-                <p>Drop Course</p>
-              </a>
+              <% if StudentRequestSetting.current.allow_drop_course %>
+                <a href="<%= drop_courses_path %>" class="nav-link <%= current_class?(drop_courses_path) %>" style="color: #c2c7d0; transition: all 0.3s;">
+                  <i class="nav-icon fas fa-folder-minus" style="color: #adb5bd;"></i>
+                  <p>Drop Course</p>
+                </a>
+              <% else %>
+                <a href="#" class="nav-link disabled" style="color: #6c757d; cursor: not-allowed;" title="Disabled by admin">
+                  <i class="nav-icon fas fa-folder-minus" style="color: #6c757d;"></i>
+                  <p>Drop Course</p>
+                </a>
+              <% end %>
             </li>
           </ul>
         </li>
         <!-- Request Makeup Exam -->
         <li class="nav-item">
-          <%= link_to makeup_exams_path, class: "nav-link #{current_class?(makeup_exams_path)}", style: "color: #c2c7d0; transition: all 0.3s;" do %>
-            <i class="nav-icon fas fa-edit" style="color: #adb5bd;"></i>
-            <p>Request Makeup Exam</p>
+          <% if StudentRequestSetting.current.allow_makeup_exam %>
+            <%= link_to makeup_exams_path, class: "nav-link #{current_class?(makeup_exams_path)}", style: "color: #c2c7d0; transition: all 0.3s;" do %>
+              <i class="nav-icon fas fa-edit" style="color: #adb5bd;"></i>
+              <p>Request Makeup Exam</p>
+            <% end %>
+          <% else %>
+            <a href="#" class="nav-link disabled" style="color: #6c757d; cursor: not-allowed;" title="Disabled by admin">
+              <i class="nav-icon fas fa-edit" style="color: #6c757d;"></i>
+              <p>Request Makeup Exam</p>
+            </a>
           <% end %>
         </li>
         <!-- Request Transfer -->
