@@ -42,6 +42,8 @@ ActiveAdmin.register Student, as: 'GraduateStudent' do
     column('Citizenship', &:nationality)
     column('Date Of Birth', &:date_of_birth)
 
+    column('Graduation Date', &:graduation_date)
+
     column('Grade 10 Result') { |student| student.school_or_university_information&.grade_10_result || 'N/A' }
     column('Grade 10  Year') { |student| student.school_or_university_information&.grade_10_exam_taken_year || 'N/A' }
     column('Grade 12 Result') { |student| student.school_or_university_information&.grade_12_exam_result || 'N/A' }
@@ -90,6 +92,7 @@ ActiveAdmin.register Student, as: 'GraduateStudent' do
     end
     column :batch
     column :graduation_status
+    column :graduation_date
 
     column 'Admission', sortable: true do |c|
       c.created_at.strftime('%b %d, %Y')
@@ -121,6 +124,7 @@ ActiveAdmin.register Student, as: 'GraduateStudent' do
   filter :entrance_exam_result_status
   filter :account_status, as: :select, collection: %w[active suspended]
   filter :graduation_status
+  filter :graduation_date
   filter :sponsorship_status
   filter :created_by
   filter :last_updated_by
@@ -139,6 +143,19 @@ ActiveAdmin.register Student, as: 'GraduateStudent' do
   scope :regular
   scope :extention
   scope :distance
+
+  form do |f|
+    f.inputs 'Student Details' do
+      f.input :graduation_date, as: :date_time_picker
+      f.input :body
+      if f.object.new_record?
+        f.input :created_by, as: :hidden, input_html: { value: current_admin_user.name.full }
+      else
+        f.input :last_updated_by, as: :hidden, input_html: { value: current_admin_user.name.full }
+      end
+    end
+    f.actions
+  end
 
   # action_item :edit, only: :show, priority: 0 do
   #   link_to 'Approve Student', generate_student_copy(student.id)
@@ -195,6 +212,8 @@ ActiveAdmin.register Student, as: 'GraduateStudent' do
                   status_tag s.account_verification_status
                 end
                 row :entrance_exam_result_status
+                row :graduation_status
+                row :graduation_date
                 row 'admission Date' do |d|
                   d.created_at.strftime('%b %d, %Y')
                 end
