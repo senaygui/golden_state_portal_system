@@ -26,7 +26,7 @@ ActiveAdmin.register MakeupExam do
 
     # Prevent edits/updates/deletes once result is added OR fully approved
     before_action only: %i[edit update destroy] do
-      if resource.add_mark.present? || resource.approved_by_all?
+      if resource.add_mark.present?
         redirect_back fallback_location: admin_makeup_exam_path(resource), alert: 'Actions are disabled after result is added.'
       end
     end
@@ -153,7 +153,7 @@ ActiveAdmin.register MakeupExam do
     
     actions defaults: false do |me|
       item 'View |', admin_makeup_exam_path(me)
-      unless me.add_mark.present? || me.approved_by_all?
+      unless me.add_mark.present?
         item 'Edit |', edit_admin_makeup_exam_path(me)
         item 'Delete', admin_makeup_exam_path(me), method: :delete, data: { confirm: 'Are you sure?' } unless me.approved_by_all?
       end
