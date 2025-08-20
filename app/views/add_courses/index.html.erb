@@ -160,7 +160,7 @@
               <td><%= course.course.credit_hour %> </td>  
               <td><%= course.department.department_name %> </td>  
               <td>
-                <% allowed_sections = Section.where(program_id: current_student.program_id, year: course.year, semester: course.semester) %>
+                <% allowed_sections = Section.where(course_id: course.course_id) %>
                 <% if course.preferred_section_id.present? %>
                   <%= Section.find_by(id: course.preferred_section_id)&.section_full_name || '-' %>
                 <% else %>
