@@ -75,6 +75,8 @@ Rails.application.routes.draw do
   get '/available/courses/:course_id/(:drop_id)', to: 'avaliable_courses#index', as: 'available_courses'
   get 'drop_courses/index', as: 'drop_courses'
   get 'add_courses/index', as: 'add_courses'
+  patch 'add_courses/:id/preferred_section', to: 'add_courses#set_preferred_section',
+                                             as: 'set_preferred_section_add_course'
   post 'create/exemptions/:applicant_id', to: 'exemptions#create', as: 'create_exemptions'
   get 'new/exemptions/:applicant_id/:approved_by', to: 'exemptions#new', as: 'new_exemptions'
   get 'index/exemptions/:applicant_id/:approved_by', to: 'exemptions#index', as: 'index_exemptions'

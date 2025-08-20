@@ -481,15 +481,15 @@ ActiveAdmin.register Student do
       f.input :current_occupation
     end
     f.inputs 'Student admission information' do
-      f.input :study_level, as: :select, collection: %w[undergraduate graduate], include_blank: false
-      f.input :admission_type, as: :select, collection: %w[online regular extention distance],
-                               include_blank: false
+      # f.input :study_level, as: :select, collection: %w[undergraduate graduate], include_blank: false
+      # f.input :admission_type, as: :select, collection: %w[online regular extention distance],
+      #                          include_blank: false
       f.input :program_id, as: :search_select, url: admin_programs_path,
                            fields: %i[program_name id], display_name: 'program_name', minimum_input_length: 2,
                            order_by: 'id_asc'
-      f.input :department_id, as: :search_select, url: admin_departments_path,
-                              fields: %i[department_name id], display_name: 'department_name', minimum_input_length: 2,
-                              order_by: 'id_asc'
+      # f.input :department_id, as: :search_select, url: admin_departments_path,
+      #                         fields: %i[department_name id], display_name: 'department_name', minimum_input_length: 2,
+      #                         order_by: 'id_asc'
     end
     f.inputs 'Student address information',
              for: [:student_address, f.object.student_address || StudentAddress.new] do |a|
@@ -618,8 +618,12 @@ ActiveAdmin.register Student do
                             admin_department_path(pr.department.id))
                   end
                 end
-                row :admission_type
-                row :study_level
+                row :admission_type do |s|
+                  s.program.admission_type
+                end
+                row :study_level do |s|
+                  s.program.study_level
+                end
                 row 'Academic year' do |si|
                   if si.academic_calendar.present?
                     link_to(si.academic_calendar.calender_year_in_gc,

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_20_070500) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_20_072600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -162,9 +162,11 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_20_070500) do
     t.datetime "updated_at", null: false
     t.uuid "dropcourse_id"
     t.string "approved_by"
+    t.uuid "preferred_section_id"
     t.index ["course_id"], name: "index_add_courses_on_course_id"
     t.index ["department_id"], name: "index_add_courses_on_department_id"
     t.index ["dropcourse_id"], name: "index_add_courses_on_dropcourse_id"
+    t.index ["preferred_section_id"], name: "index_add_courses_on_preferred_section_id"
     t.index ["section_id"], name: "index_add_courses_on_section_id"
     t.index ["student_id"], name: "index_add_courses_on_student_id"
   end

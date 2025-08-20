@@ -117,6 +117,8 @@ class MakeupExam < ApplicationRecord
        other_payment.payment_transaction.finance_approval_status == 'approved' &&
        other_payment.invoice_status == 'approved'
    end
+
+  public :approved_by_all?
 end
 
 # class MakeupExam < ApplicationRecord
