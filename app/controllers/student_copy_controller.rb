@@ -56,7 +56,8 @@ class StudentCopyController < ApplicationController
           elsif @student.institution_transfer_status == 'approved'
             render pdf: "student_copy_#{@student.first_name}",
                    template: 'student_copy/transfer',
-                   layout: 'pdf'
+                   layout: 'pdf',
+                   orientation: 'Landscape'
           end
         end
       end

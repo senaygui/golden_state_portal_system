@@ -147,7 +147,6 @@ ActiveAdmin.register Student, as: 'GraduateStudent' do
   form do |f|
     f.inputs 'Student Details' do
       f.input :graduation_date, as: :date_time_picker
-      f.input :body
       if f.object.new_record?
         f.input :created_by, as: :hidden, input_html: { value: current_admin_user.name.full }
       else
