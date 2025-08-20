@@ -160,7 +160,7 @@
               <td><%= course.course.credit_hour %> </td>  
               <td><%= course.department.department_name %> </td>  
               <td>
-                <% allowed_sections = Section.where(course_id: course.course_id) %>
+                <% allowed_sections = Section.joins(:course_registrations).where(course_registrations: {course_id: course.course_id}).where('course_registrations.created_at >= ?', 2.weeks.ago).distinct%>
                 <% if course.preferred_section_id.present? %>
                   <%= Section.find_by(id: course.preferred_section_id)&.section_full_name || '-' %>
                 <% else %>
