@@ -72,6 +72,7 @@ class PagesController < ApplicationController
           course_registration.semester = @semester_registration.semester
           course_registration.year = @semester_registration.year
           course_registration.created_by = current_student.id
+          course_registration.section_id = course.preferred_section_id
           if params[:course_add] == 'approved'
             course_registration.add_course_id = course.id
             course_registration.enrollment_status = 'enrolled'
