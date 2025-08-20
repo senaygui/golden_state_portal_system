@@ -78,6 +78,7 @@ class PagesController < ApplicationController
           end
         end.tap do |course_registration|
           course.update(status: :taken) if course_registration.persisted?
+          course.update(section_id: :preferred_section_id) if course_registration.persisted?
         end
       end
 
