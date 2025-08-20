@@ -66,7 +66,7 @@ ActiveAdmin.register AcademicCalendar do
   form do |f|
     f.semantic_errors
     f.inputs 'Academic calendar information' do
-      f.input :calender_year, label: 'Calender title'
+      # f.input :calender_year, label: 'Calender title'
       f.input :calender_year_in_gc
       f.input :calender_year_in_ec
       f.input :starting_date, as: :date_time_picker

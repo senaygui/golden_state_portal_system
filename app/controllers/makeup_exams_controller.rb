@@ -43,13 +43,14 @@ class MakeupExamsController < ApplicationController
       @courses = CourseRegistration
                  .where(student: current_student, enrollment_status: 'enrolled', semester: current_student.semester)
                  .joins(:student_grade)
-                 .where(student_grades: { letter_grade: %w[I NG] })
+                 .where(student_grades: { letter_grade: %w[I] })
                  .includes(:course)
       render :new and return
     end
 
     if @makeup_exam.save
-      redirect_to other_payment_path(OtherPayment.where(payable_type: 'MakeupExam').where(payable_id: @makeup_exam).last),
+      # redirect_to other_payment_path(OtherPayment.where(payable_type: 'MakeupExam').where(payable_id: @makeup_exam).last)
+      redirect_to @makeup_exam,
                   notice: 'Makeup exam request submitted successfully. Please proceed to payment.'
     else
       @courses = CourseRegistration

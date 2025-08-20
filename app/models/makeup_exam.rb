@@ -1,7 +1,8 @@
 class MakeupExam < ApplicationRecord
    # Callbacks
-   after_create :generate_invoice_for_makeup_exam
+   after_save :generate_invoice_for_makeup_exam
    after_save :makeup_exam_update_status
+  #  after_create :assign_program_from_associations
 
    # Validations
    validates :year, presence: true
@@ -35,6 +36,12 @@ class MakeupExam < ApplicationRecord
      errors.add(:attachment, 'must be a JPEG, PNG, or PDF') unless acceptable_types.include?(attachment.content_type)
    end
 
+  #  def assign_program_from_associations
+  #    return if program_id.present?
+  #    pid = course&.program_id || student&.program_id
+  #    update_column(:program_id, pid) if pid.present?
+  #  end
+
      private
 
    def limit_assessment_result
@@ -44,7 +51,7 @@ class MakeupExam < ApplicationRecord
    end
 
    def generate_invoice_for_makeup_exam
-     unless other_payment.present?
+     if !other_payment.present? && department_approval == 'approved' && dean_approval == 'approved' && registrar_approval == 'approved' && instructor_approval == 'approved' && academic_affair_approval == 'approved'
        OtherPayment.create do |invoice|
          invoice.student_id = student.id
          invoice.academic_calendar_id = academic_calendar_id

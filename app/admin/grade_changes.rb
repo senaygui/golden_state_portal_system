@@ -4,6 +4,38 @@ ActiveAdmin.register GradeChange do
     permit_params :section_id, :academic_calendar_id, :student_id, :course_id, :section_id, :semester, :previous_result_total,
                   :previous_letter_grade, :current_result_total, :current_letter_grade, :reason, :instructor_approval, :instructor_name, :instructor_date_of_response, :registrar_approval, :registrar_name, :registrar_date_of_response, :dean_approval, :dean_name, :dean_date_of_response, :department_approval, :department_head_name, :department_head_date_of_response, :academic_affair_approval, :academic_affair_name, :academic_affair_date_of_response, :course_registration_id, :student_grade_id, :assessment_id, :add_mark, :course_section_id, :program_id, :department_id, :year, :instructor_reason
 
+    controller do
+      # Scope records by role: instructors only see their assigned sections/courses; dept head sees their department
+      def scoped_collection
+        if current_admin_user.role == 'instructor'
+          base = GradeChange.all
+          section_ids = CourseInstructor.where(admin_user_id: current_admin_user.id).pluck(:section_id).compact
+          course_ids  = CourseInstructor.where(admin_user_id: current_admin_user.id).pluck(:course_id).compact
+
+          rels = []
+          rels << base.where(section_id: section_ids) if section_ids.any?
+          rels << base.where(course_id: course_ids) if course_ids.any?
+
+          return rels.any? ? rels.reduce { |a, b| a.or(b) } : base.none
+        elsif current_admin_user.role == 'department head'
+          GradeChange.where(department_id: current_admin_user.department.id)
+        else
+          GradeChange.all
+        end
+      end
+
+      # Block edit/update/destroy once all approvals are approved
+      before_action only: %i[edit update destroy] do
+        if resource.department_approval == 'approved' &&
+           resource.registrar_approval == 'approved' &&
+           resource.dean_approval == 'approved' &&
+           resource.instructor_approval == 'approved' &&
+           resource.academic_affair_approval == 'approved'
+          redirect_back fallback_location: admin_grade_change_path(resource), alert: 'Actions are disabled after all approvals are completed.'
+        end
+      end
+    end
+
     index do
       selectable_column
       column :student_name, sortable: true do |n|
@@ -35,7 +67,14 @@ ActiveAdmin.register GradeChange do
       column 'Created At', sortable: true do |c|
         c.created_at.strftime('%b %d, %Y')
       end
-      actions
+      actions defaults: false do |gc|
+        locked = gc.department_approval == 'approved' && gc.registrar_approval == 'approved' && gc.dean_approval == 'approved' && gc.instructor_approval == 'approved' && gc.academic_affair_approval == 'approved'
+        item 'View |', admin_grade_change_path(gc)
+        unless locked
+          item 'Edit |', edit_admin_grade_change_path(gc)
+          item 'Delete', admin_grade_change_path(gc), method: :delete, data: { confirm: 'Are you sure?' }
+        end
+      end
     end
     filter :student_id, as: :search_select_filter, url: proc { admin_students_path },
                         fields: %i[student_id id], display_name: 'student_id', minimum_input_length: 2,
@@ -76,7 +115,7 @@ ActiveAdmin.register GradeChange do
           f.input :reason, lebel: 'Student Reason'
           f.input :add_mark, lebel: 'Mark Added'
 
-          f.input :academic_calendar_id, as: :hidden, input_html: { value: params[:academic_calendar_id] }
+          # f.input :academic_calendar_id, as: :hidden, input_html: { value: params[:academic_calendar_id] }
           f.input :student_id, as: :hidden, input_html: { value: params[:student_id] }
           f.input :course_id, as: :hidden, input_html: { value: params[:course_id] }
           f.input :section_id, as: :hidden, input_html: { value: params[:section_id] }
@@ -132,6 +171,25 @@ ActiveAdmin.register GradeChange do
         end
       end
       f.actions
+    end
+
+    # Customize action items on show: hide Edit/Delete after all approvals
+    config.clear_action_items!
+
+    action_item :new, only: :index do
+      link_to 'New Grade Change', new_resource_path if authorized?(:create, GradeChange)
+    end
+
+    action_item :edit, only: :show, if: proc {
+      !(resource.department_approval == 'approved' && resource.registrar_approval == 'approved' && resource.dean_approval == 'approved' && resource.instructor_approval == 'approved' && resource.academic_affair_approval == 'approved')
+    } do
+      link_to 'Edit Grade Change', edit_resource_path(resource)
+    end
+
+    action_item :destroy, only: :show, if: proc {
+      !(resource.department_approval == 'approved' && resource.registrar_approval == 'approved' && resource.dean_approval == 'approved' && resource.instructor_approval == 'approved' && resource.academic_affair_approval == 'approved')
+    } do
+      link_to 'Delete Grade Change', resource_path(resource), method: :delete, data: { confirm: 'Are you sure?' }
     end
 
     show title: proc { |grade_change|

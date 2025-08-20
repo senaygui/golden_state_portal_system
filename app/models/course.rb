@@ -3,6 +3,8 @@ class Course < ApplicationRecord
 	scope :by_program, -> (program_id) { where(program_id: program_id) }
 	after_save :create_or_update_course_offering
 	after_create :copy_to_uneditable_course
+	# Ensure title includes program name and course code
+	after_save :append_program_and_code_to_title
 	#validations
         validates :semester, :presence => true
 		validates :year, :presence => true
@@ -99,4 +101,21 @@ class Course < ApplicationRecord
       last_updated_by: self.last_updated_by
     )
   end
+
+	def append_program_and_code_to_title
+	  return if self.course_title.blank? || self.course_code.blank? || self.program.nil?
+
+	  program_name = self.program.program_name.to_s.strip
+	  code = self.course_code.to_s.strip
+	  return if program_name.blank? || code.blank?
+
+	  # Prevent duplicate appends if already present
+	  already_has_program = self.course_title.include?(program_name)
+	  already_has_code = self.course_title.include?(code)
+	  return if already_has_program && already_has_code
+
+	  new_title = "#{self.course_title} - (#{code}) - #{program_name}"
+	  # Avoid callback loops by skipping validations/callbacks
+	  update_column(:course_title, new_title)
+	end
 end

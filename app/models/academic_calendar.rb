@@ -8,6 +8,9 @@ class AcademicCalendar < ApplicationRecord
     validates :admission_type, presence: true
     validates :study_level, presence: true
 
+    # auto-generate calender_year from key attributes
+    before_validation :set_calender_year
+
     # #scope
      scope :recently_added, -> { where('created_at >= ?', 1.week.ago) }
      scope :undergraduate, -> { where(study_level: 'undergraduate') }
@@ -35,6 +38,15 @@ class AcademicCalendar < ApplicationRecord
     has_many :recurring_payments
     has_many :add_and_drops
     has_many :makeup_exams
+
+    def set_calender_year
+      return if calender_year_in_ec.blank? || admission_type.blank? || study_level.blank?
+
+      # Example format: "2016/17 - Regular (Undergraduate)"
+      admission = admission_type.to_s.titleize
+      level = study_level.to_s.titleize
+      self.calender_year = "Academic Calendar Of #{calender_year_in_ec} - #{level} (#{admission})"
+    end
 
     def to_ethiopian_date(gregorian_date)
       gregorian_date = Date.parse(gregorian_date.to_s) unless gregorian_date.is_a?(Date)

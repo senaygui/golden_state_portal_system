@@ -46,8 +46,8 @@ ActiveAdmin.register Section, as: "ProgramSection" do
     f.semantic_errors
     f.inputs "Section Information" do
       f.input :program_id, as: :search_select, url: admin_programs_path, fields: [:program_name, :id], display_name: 'program_name', minimum_input_length: 2, label: "Program"
-      f.input :section_short_name
-      f.input :section_full_name
+      # f.input :section_short_name
+      # f.input :section_full_name
       f.input :total_capacity
       f.input :batch, as: :select, collection: [
                 '2019/2020',

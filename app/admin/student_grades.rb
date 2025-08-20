@@ -3,6 +3,9 @@ ActiveAdmin.register StudentGrade do
     permit_params :dean_approval_status, :instructor_submit_status, :instructor_name, :dean_head_name, :department_approval, :department_head_name, :department_head_date_of_response, :course_registration_id,
                   :student_id, :letter_grade, :grade_point, :assesment_total, :grade_point, :course_id, assessments_attributes: %i[id student_grade_id assessment_plan_id student_id course_id result created_by updated_by _destroy]
 
+    # Remove default action items so we can fully control visibility
+    config.clear_action_items!
+
     # Limit listing: instructors see only their assigned students; admins see all
     controller do
       def scoped_collection
@@ -17,6 +20,17 @@ ActiveAdmin.register StudentGrade do
             .where(ci: { admin_user_id: current_admin_user.id })
         else
           base
+        end
+      end
+
+      # Prevent instructors from editing/removing submitted grades even if they hit routes directly
+      before_action only: %i[edit update destroy] do
+        next unless current_admin_user.role == 'instructor'
+
+        record = resource
+        submitted = record.instructor_submit_status.to_s.downcase == 'submitted'
+        if submitted
+          redirect_back(fallback_location: admin_student_grades_path, alert: 'Edit is disabled: grade already submitted.')
         end
       end
     end
@@ -223,6 +237,9 @@ ActiveAdmin.register StudentGrade do
     end
 
     action_item :new, only: :show, priority: 0 do
+      # Hide when submitted
+      next if student_grade.instructor_submit_status.to_s.downcase == 'submitted'
+
       if (current_admin_user.role == 'registrar head') || (current_admin_user.role == 'admin')
         link_to 'Add Grade Change',
                 new_admin_grade_change_path(course_id: "#{student_grade.course.id}",
@@ -231,15 +248,31 @@ ActiveAdmin.register StudentGrade do
     end
 
     action_item :new, only: :show, priority: 0 do
+      # Hide when submitted
+      next if student_grade.instructor_submit_status.to_s.downcase == 'submitted'
+
       if (current_admin_user.role == 'registrar head') || (current_admin_user.role == 'admin')
         link_to 'Add Makeup exam',
                 new_admin_makeup_exam_path(course_id: "#{student_grade.course.id}",
                                            section_id: "#{student_grade.course_registration.semester_registration.section.id}", academic_calendar_id: "#{student_grade.course_registration.academic_calendar.id}", semester: "#{student_grade.course_registration.semester}", year: "#{student_grade.course_registration.year}", student_id: "#{student_grade.student.id}", course_registration_id: "#{student_grade.course_registration.id}", student_grade_id: "#{student_grade.id}", department_id: "#{student_grade.student.program.department.id}", program_id: "#{student_grade.student.program.id}")
       end
     end
-    action_item :edit, only: :show, priority: 1  do
+    action_item :edit, only: :show, priority: 1 do
+      # Hide when submitted
+      next if student_grade.instructor_submit_status.to_s.downcase == 'submitted'
+
+      # This is the "Approve Grade" button for department head/admin
       if (current_admin_user.role == 'department head') || (current_admin_user.role == 'admin')
         link_to 'Approve Grade', edit_admin_student_grade_path(student_grade.id, page_name: 'grade_approve')
+      end
+    end
+
+    # Override default Edit button: hide for instructors when submitted
+    action_item :default_edit, only: :show do
+      # Hide for everyone when submitted
+      submitted = student_grade.instructor_submit_status.to_s.downcase == 'submitted'
+      if authorized?(:update, student_grade) && !submitted
+        link_to 'Edit Student grade', edit_admin_student_grade_path(student_grade)
       end
     end
 

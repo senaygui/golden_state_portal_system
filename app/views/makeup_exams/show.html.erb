@@ -1,9 +1,20 @@
 <div class="container mt-4">
+  <% if @makeup_exam.department_approval == 'approved' && @makeup_exam.add_mark.nil? %>
+        <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+          <div>
+            Department has approved your makeup exam request.
+            <% if @makeup_exam.other_payment.present? && @makeup_exam.other_payment.invoice_status == 'unpaid' %>
+              You can proceed to payment: <%= link_to 'Pay Now', other_payment_path(@makeup_exam.other_payment), class: 'alert-link' %>.
+            <% end %>
+          </div>
+        </div>
+      <% end %>
   <div class="card">
     <div class="card-header bg-primary text-white">
       <h4 class="mb-0">Makeup Exam Request Details</h4>
     </div>
     <div class="card-body">
+      
       <div class="row">
         <div class="col-md-6">
           <h5 class="text-muted mb-3">Student & Course Information</h5>
@@ -19,6 +30,9 @@
           <h5 class="text-muted mb-3">Grade & Request Information</h5>
           <div class="mb-2"><strong>Previous Total:</strong> <%= @makeup_exam.previous_result_total %></div>
           <div class="mb-2"><strong>Previous Letter Grade:</strong> <%= @makeup_exam.previous_letter_grade %></div>
+          <div class="mb-2"><strong>Makeup Exam Result:</strong> <%= @makeup_exam.add_mark %></div>
+          <div class="mb-2"><strong>Current Letter Grade:</strong> <%= @makeup_exam.current_letter_grade %></div>
+          <div class="mb-2"><strong>Total Assessments:</strong> <%= @makeup_exam.student_grade&.assesment_total %></div>
           <div class="mb-2"><strong>Reason:</strong> <%= @makeup_exam.reason %></div>
           <div class="mb-2"><strong>Status:</strong> 
             <% if @makeup_exam.status == 'approved' %>
@@ -30,6 +44,20 @@
             <% end %>
           </div>
           <div class="mb-2"><strong>Created At:</strong> <%= @makeup_exam.created_at.strftime("%B %d, %Y") %></div>
+          <% if @makeup_exam.department_approval == 'approved' %>
+            <div class="mb-2">
+              <strong>Department Approval:</strong>
+              <span class="badge bg-success">Approved</span>
+            </div>
+            <div class="mb-2">
+              <% if @makeup_exam.other_payment.present? && @makeup_exam.other_payment.invoice_status == 'unpaid' %>
+                <%= link_to 'Pay Now And Attend The Exam', other_payment_path(@makeup_exam.other_payment), class: 'btn btn-danger btn-sm' %>
+              <% else %>
+                <%= link_to 'Go to Payments', other_payments_path, class: 'btn btn-secondary btn-sm' %>
+              <% end %>
+            </div>
+          <% end %>
+          
         </div>
       </div>
       <div class="row mt-4">

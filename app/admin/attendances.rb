@@ -1,43 +1,45 @@
+require 'csv'
 ActiveAdmin.register Attendance do
-menu parent: "Attendance"
-  permit_params :program_id,:section_id,:academic_calendar_id,:course_title,:attendance_title,:year,:semester,:created_by,:updated_by,:course_id,sessions_attributes: [:id,:attendance_id,:starting_date,:ending_date,:academic_calendar_id,:semester,:year,:session_title,:created_by,:updated_by, :_destroy]
+  menu parent: 'Attendance'
+  permit_params :program_id, :section_id, :academic_calendar_id, :course_title, :attendance_title, :year, :semester,
+                :created_by, :updated_by, :course_id, sessions_attributes: %i[id attendance_id starting_date ending_date academic_calendar_id semester year session_title created_by updated_by _destroy]
 
   index do
     selectable_column
-    
+
     column :attendance_title
     column :course_title
-    column "Program" do |pd|
+    column 'Program' do |pd|
       pd.program.program_name
     end
-    column "academic year", sortable: true do |n|
+    column 'academic year', sortable: true do |n|
       link_to n.academic_calendar.calender_year, admin_academic_calendar_path(n.academic_calendar)
     end
     column :year
     column :semester
-    column "Created At", sortable: true do |c|
-      c.created_at.strftime("%b %d, %Y")
+    column 'Created At', sortable: true do |c|
+      c.created_at.strftime('%b %d, %Y')
     end
     actions
-  end 
+  end
 
   form do |f|
     f.semantic_errors
-    
-    f.inputs "Attendance information" do
+
+    f.inputs 'Attendance information' do
       f.input :attendance_title
-      
+
       f.input :course_id, as: :search_select, url: admin_courses_path,
-            fields: [:course_code, :id], display_name: 'course_code', minimum_input_length: 2, label: "course code",
-            order_by: 'id_asc'
+                          fields: %i[course_title id], display_name: 'course_title', minimum_input_length: 2, label: 'course title',
+                          order_by: 'id_asc'
       f.input :section_id, as: :search_select, url: admin_program_sections_path,
-            fields: [:section_full_name, :id], display_name: 'section_full_name', minimum_input_length: 2,
-            order_by: 'id_asc'
+                           fields: %i[section_full_name id], display_name: 'section_full_name', minimum_input_length: 2,
+                           order_by: 'id_asc'
       f.input :academic_calendar_id, as: :search_select, url: admin_academic_calendars_path,
-            fields: [:calender_year, :id], display_name: 'calender_year', minimum_input_length: 2,
-            order_by: 'id_asc'
-      f.input :year
-      f.input :semester
+                                     fields: %i[calender_year id], display_name: 'calender_year', minimum_input_length: 2,
+                                     order_by: 'id_asc'
+      # f.input :year
+      # f.input :semester
       f.input :created_at, as: :date_time_picker
       if f.object.new_record?
         f.input :created_by, as: :hidden, input_html: { value: current_admin_user.name.full }
@@ -45,43 +47,45 @@ menu parent: "Attendance"
         f.input :updated_by, as: :hidden, input_html: { value: current_admin_user.name.full }
       end
     end
-  
-   # if f.object.sessions.empty?
-   #   f.object.sessions << Session.new
-   # end
-   # panel "Session Information" do
-   #   f.has_many :sessions, heading: " ", remote: true, allow_destroy: true, new_record: true do |a|
-   #     a.input :session_title
-   #     a.input :starting_date, as: :date_time_picker 
-   #     a.input :ending_date, as: :date_time_picker 
-  #
-   #     if a.object.new_record?
-   #       a.input :created_by, as: :hidden, input_html: { value: current_admin_user.name.full }
-   #     else
-   #       a.input :last_updated_by, as: :hidden, input_html: { value: current_admin_user.name.full }
-   #     end 
-   #     a.label :_destroy
-   #   end
-   # end
-  
+
+    f.object.sessions << Session.new if f.object.sessions.empty?
+    panel 'Session Information' do
+      f.has_many :sessions, heading: ' ', remote: true, allow_destroy: true, new_record: true do |a|
+        a.input :session_title
+        a.input :starting_date, as: :date_time_picker
+        a.input :ending_date, as: :date_time_picker
+
+        if a.object.new_record?
+          a.input :created_by, as: :hidden, input_html: { value: current_admin_user.name.full }
+        else
+          a.input :last_updated_by, as: :hidden, input_html: { value: current_admin_user.name.full }
+        end
+        a.label :_destroy
+      end
+    end
+
     f.actions
   end
-  
 
   action_item :download_pdf, only: :show do
     link_to 'Print Attendance Sheet', download_pdf_admin_attendance_path(attendance), method: :get
   end
 
-  #action_item :edit, only: :show, priority: 0 do
-  #  link_to 'Add Session', edit_admin_attendance_path(attendance.id, page_name: "add")
-  #end
+  # Download CSV of students for this attendance's section
+  action_item :download_students_csv, only: :show do
+    link_to 'Download Students CSV', download_students_csv_admin_attendance_path(attendance), method: :get
+  end
+
+  action_item :edit, only: :show, priority: 0 do
+    link_to 'Add Session', edit_admin_attendance_path(attendance.id, page_name: 'add')
+  end
 
   show title: :attendance_title do
     tabs do
-      tab "Attendance Information" do
+      tab 'Attendance Information' do
         columns do
-          column max_width: "37%" do
-            panel "Attendance information" do
+          column max_width: '37%' do
+            panel 'Attendance information' do
               attributes_table_for attendance do
                 row :attendance_title
                 row :program do |pr|
@@ -103,55 +107,61 @@ menu parent: "Attendance"
               end
             end
           end
-          #column min_width: "60%" do
-          #  panel "Attendance Session" do
-          #    table_for attendance.sessions do
-          #      column :session_title
-          #      column :starting_date
-          #      column :ending_date
-          #      column :created_at
-          #      column "links" do |c|
-          #        "#{link_to("Attendance Sheet", edit_admin_session_path(c, page_name: "add"))}".html_safe
-          #      end
-          #    end
-          #  end 
-          #end 
+          column min_width: '60%' do
+            panel 'Attendance Session' do
+              table_for attendance.sessions do
+                column :session_title
+                column :starting_date
+                column :ending_date
+                column :created_at
+                column 'links' do |c|
+                  "#{link_to('Attendance Sheet', edit_admin_session_path(c, page_name: 'add'))}".html_safe
+                end
+              end
+            end
+          end
         end
       end
-      tab "Student List" do
-        panel "Student List" do
-          table_for attendance.section.students do #course_registrations.where(academic_calendar_id: attendance.academic_calendar, course_id: attendance.course ) do
+      tab 'Student List' do
+        panel 'Student List' do
+          table_for CourseRegistration.where(academic_calendar_id: attendance.academic_calendar, course_id: attendance.course, section_id: attendance.section_id, enrollment_status: 'enrolled') do
             column :student_full_name do |s|
-              s.first_name
-            end  
-            column "STUDENT ID" do |s|
-              s.student_id
+              s.student_full_name
+            end
+            column 'STUDENT ID' do |s|
+              s.student.student_id
             end
             column :section do |sec|
               sec.section.section_short_name
             end
-            #column :total_session do |section|
-            #  attendance.sessions.count
-            #end
-            #column :total_present_days do |section|
-              #attendance.sessions.map {|session| session.student_attendances.where(student_id: section.student, present: true).count}.sum
-              # section.student.student_attendances.where(present: true).count
-            #end
-            #column :total_absent_days do |section|
-              #attendance.sessions.map {|session| session.student_attendances.where(student_id: section.student, absent: true).count}.sum
-            #end
-            # column :avg_present_days do |section|
-            #   span ((attendance.sessions.map {|session| session.student_attendances.where(student_id: section.student, present: true).count}.sum).to_i / attendance.sessions.count.to_i)
-            # end
-            # column :ending_date
-            # column :created_at
+            column :total_session do |_section|
+              attendance.sessions.count
+            end
+            column :total_present_days do |section|
+              attendance.sessions.map do |session|
+                session.student_attendances.where(student_id: section.student, present: true).count
+              end.sum
+              section.student.student_attendances.where(present: true).count
+            end
+            column :total_absent_days do |section|
+              attendance.sessions.map do |session|
+                session.student_attendances.where(student_id: section.student, absent: true).count
+              end.sum
+            end
+            column :avg_present_days do |section|
+              span(attendance.sessions.map do |session|
+                     session.student_attendances.where(student_id: section.student,
+                                                       present: true).count
+                   end.sum.to_i / attendance.sessions.count.to_i)
+            end
+            column :ending_date
+            column :created_at
           end
-        end 
+        end
       end
-      #tab "Attendance Report" do
-      #end
+      # tab "Attendance Report" do
+      # end
     end
-    
   end
 
   member_action :download_pdf, method: :get do
@@ -160,4 +170,24 @@ menu parent: "Attendance"
     send_data pdf, filename: "attendance_#{attendance.id}.pdf", type: 'application/pdf', disposition: 'inline'
   end
   
+  member_action :download_students_csv, method: :get do
+    attendance = Attendance.find(params[:id])
+    students = CourseRegistration.where(academic_calendar_id: attendance.academic_calendar, course_id: attendance.course, section_id: attendance.section_id, enrollment_status: 'enrolled') || []
+
+    csv_str = CSV.generate(headers: true) do |csv|
+      csv << ['Student Name', 'Student ID']
+      students.each do |s|
+        name = if s.respond_to?(:full_name)
+              s.student_full_name
+               else
+                 [s.student.first_name, s.student.middle_name, s.student.last_name].compact.join(' ')
+               end
+        csv << [name, s.student.student_id]
+      end
+    end
+
+    send_data csv_str,
+              filename: "attendance_#{attendance.attendance_title}_students.csv",
+              type: 'text/csv'
+  end
 end

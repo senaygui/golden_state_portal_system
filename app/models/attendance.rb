@@ -1,5 +1,5 @@
 class Attendance < ApplicationRecord
-	before_save :attribute_assignment
+  before_save :attribute_assignment
   
   belongs_to :program, optional: true
   belongs_to :section
@@ -11,10 +11,16 @@ class Attendance < ApplicationRecord
   ##scope
     scope :recently_added, lambda { where('created_at >= ?', 1.week.ago)}
   
-	def attribute_assignment
+  def attribute_assignment
     self[:program_id] = self.course.program.id
     # self[:academic_calendar_id] = AcademicCalendar.where(admission_type: self.course_section.course_breakdown.curriculum.program.admission_type).where(study_level: self.course_section.course_breakdown.curriculum.program.study_level).last.id
     # self[:course_breakdown_id] = self.course_section.course_breakdown.id
     self[:course_title] = self.course.course_title
+    # assign year and semester from the section
+    if self.section.present?
+      self[:year] = self.section.year
+      self[:semester] = self.section.semester
+    end
+    
   end
 end
