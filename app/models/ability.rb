@@ -148,8 +148,10 @@ class Ability
       can %i[read destroy], StudentGrade, course_id: Course.instructor_courses(user.id)
       can :read, Notice
       can :read, StudentGrade, course_id: Course.instructor_courses(user.id)
-      can :update, StudentGrade, course_id: Course.instructor_courses(user.id), instructor_submit_status: 'not_submitted'
-      can :destroy, StudentGrade, course_id: Course.instructor_courses(user.id), instructor_submit_status: 'not_submitted'
+      can :update, StudentGrade, course_id: Course.instructor_courses(user.id),
+                                 instructor_submit_status: 'not_submitted'
+      can :destroy, StudentGrade, course_id: Course.instructor_courses(user.id),
+                                  instructor_submit_status: 'not_submitted'
       cannot %i[destroy update], StudentGrade, instructor_submit_status: 'submitted'
       # Destroy action with a block for additional conditions
       can :destroy, StudentGrade do |grade|
@@ -224,6 +226,7 @@ class Ability
       # cannot :destroy, AddAndDrop, created_by: 'self'
       can %i[update destroy], Notice, created_by: user.name.full
       can :read, Notice
+      can :create, Notice
     when 'data encoder'
       can :manage, ActiveAdmin::Page, name: 'Dashboard', namespace_name: 'admin'
       can :manage, AcademicCalendar
