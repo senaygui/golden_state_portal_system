@@ -134,6 +134,8 @@ class Ability
       can :manage, Exemption
       can :manage, Notice
     when 'instructor'
+      can :manage, Attendance, course_id: Course.instructor_courses(user.id)
+      can :read, Section
       can :manage, ActiveAdmin::Page, name: 'BulkAssessments', namespace_name: 'admin'
       can :manage, ActiveAdmin::Page, name: 'Dashboard', namespace_name: 'admin'
       can :read, AcademicCalendar
@@ -156,7 +158,6 @@ class Ability
       can :read, Program
       # cannot :destroy, StudentGrade
       # can %i[create read destroy], Assessment, admin_user_id: user.id
-      can :manage, Attendance
       # can :update, Attendance, section_id: Section.instructor_courses(user.id)
       # can :manage, Session
       # can :read, Session, course_id: Section.instructors(user.id)
