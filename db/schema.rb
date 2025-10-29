@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_20_120010) do
+ActiveRecord::Schema[7.0].define(version: 2025_10_29_085813) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -425,6 +425,17 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_20_120010) do
     t.index ["department_id"], name: "index_course_modules_on_department_id"
   end
 
+  create_table "course_offering_courses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "course_id", null: false
+    t.uuid "curriculum_course_offering_id", null: false
+    t.integer "year"
+    t.integer "semester"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_course_offering_courses_on_course_id"
+    t.index ["curriculum_course_offering_id"], name: "index_course_offering_courses_on_curriculum_course_offering_id"
+  end
+
   create_table "course_offerings", force: :cascade do |t|
     t.uuid "course_id", null: false
     t.string "batch"
@@ -514,6 +525,16 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_20_120010) do
     t.index ["course_module_id"], name: "index_courses_on_course_module_id"
     t.index ["curriculum_id"], name: "index_courses_on_curriculum_id"
     t.index ["program_id"], name: "index_courses_on_program_id"
+  end
+
+  create_table "curriculum_course_offerings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "program_id", null: false
+    t.string "batch", null: false
+    t.uuid "curriculum_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["curriculum_id"], name: "index_curriculum_course_offerings_on_curriculum_id"
+    t.index ["program_id"], name: "index_curriculum_course_offerings_on_program_id"
   end
 
   create_table "curriculums", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1613,8 +1634,12 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_20_120010) do
   add_foreign_key "class_schedules", "courses"
   add_foreign_key "class_schedules", "programs"
   add_foreign_key "class_schedules", "sections"
+  add_foreign_key "course_offering_courses", "courses"
+  add_foreign_key "course_offering_courses", "curriculum_course_offerings"
   add_foreign_key "course_offerings", "courses"
   add_foreign_key "course_registrations", "add_courses"
+  add_foreign_key "curriculum_course_offerings", "curriculums"
+  add_foreign_key "curriculum_course_offerings", "programs"
   add_foreign_key "departments", "faculties"
   add_foreign_key "dropcourses", "courses"
   add_foreign_key "dropcourses", "departments"

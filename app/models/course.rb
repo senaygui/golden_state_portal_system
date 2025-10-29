@@ -20,6 +20,7 @@ class Course < ApplicationRecord
 
 	
  		# has_many :programs, through: :curriculums, dependent: :destroy
+	has_many :course_offering_courses, dependent: :destroy
 	has_many :course_offerings, dependent: :destroy 
  	has_many :student_grades, dependent: :destroy
  	has_many :student_courses, dependent: :destroy

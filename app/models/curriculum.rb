@@ -2,13 +2,13 @@ class Curriculum < ApplicationRecord
 
 	##validations
    validates :curriculum_title, :presence => true, uniqueness: true
-	 validates :batch, :presence => true
 	 validates :curriculum_version, :presence => true, uniqueness: true
 	 validates :curriculum_active_date, :presence => true
 	##associations
 	  belongs_to :program
 	  has_many :courses, dependent: :destroy
 	  has_many :grade_systems, dependent: :destroy
+	  has_many :curriculum_course_offerings, dependent: :destroy
 
 	  has_many :uneditable_courses, dependent: :destroy
 	  has_one :uneditable_grade_system, dependent: :destroy
