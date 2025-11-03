@@ -1,72 +1,77 @@
 ActiveAdmin.register Student do
   menu parent: 'Student managment'
   # config.batch_actions = true
-  permit_params :department_id, :section_id, :payment_version, :password_confirmation, :batch, :nationality, :undergraduate_transcript, :highschool_transcript,
+  permit_params :department_id, :section_id, :payment_version, :password_confirmation, :encrypted_password, :batch, :nationality, :undergraduate_transcript, :highschool_transcript,
                 :grade_10_matric, :grade_12_matric, :coc, :diploma_certificate, :degree_certificate, :place_of_birth, :sponsorship_status, :entrance_exam_result_status, :student_id_taken_status, :old_id_number, :curriculum_version, :current_occupation, :tempo_status, :created_by, :last_updated_by, :photo, :email, :password, :first_name, :last_name, :middle_name, :gender, :student_id, :date_of_birth, :program_id, :department, :admission_type, :study_level, :marital_status, :year, :semester, :account_verification_status, :document_verification_status, :account_status, :graduation_status, student_address_attributes: %i[id country city region zone sub_city house_number special_location moblie_number telephone_number pobox woreda created_by last_updated_by], emergency_contact_attributes: %i[id full_name relationship cell_phone email current_occupation name_of_current_employer pobox email_of_employer office_phone_number created_by last_updated_by], school_or_university_information_attributes: %i[id level coc_attendance_date college_or_university phone_number address field_of_specialization cgpa last_attended_high_school school_address grade_10_result grade_10_exam_taken_year grade_12_exam_result grade_12_exam_taken_year created_by updated_by coc_id tvet letter_of_equivalence entrance_exam_id]
 
-  active_admin_import \
-    validate: true, \
-    csv_options: { col_sep: ',', row_sep: :auto, quote_char: '"' }, \
+  active_admin_import(
+    validate: false,
+    timestamps: true,
+    batch_size: 1000,
     headers_rewrites: {
-      # allow human-friendly CSV headers and map them to model attributes
-      'password' => :encrypted_password,
-      'program' => :program_id,
-      'program_name' => :program_id,
-      'department' => :department_id,
-      'department_name' => :department_id,
-      'section' => :section_id,
-      'section_full_name' => :section_id
-    }, \
-    before_batch_import: ->(importer) {
-      # Collect present CSV values to build exact replacement maps
-      prog_vals = importer.values_at(:program_id).flatten.compact.map { |v| v.to_s }.uniq
-      dept_vals = importer.values_at(:department_id).flatten.compact.map { |v| v.to_s }.uniq
-      sec_vals  = importer.values_at(:section_id).flatten.compact.map { |v| v.to_s }.uniq
-
-      # Build DB indices (by name) and case-insensitive helpers
-      programs_index = Program.pluck(:program_name, :id).to_h
-      programs_index_ci = programs_index.transform_keys { |k| k.to_s.strip.downcase }
-      departments_index = Department.pluck(:department_name, :id).to_h
-      departments_index_ci = departments_index.transform_keys { |k| k.to_s.strip.downcase }
-      sections_index = Section.pluck(:section_full_name, :id).to_h
-      sections_index_ci = sections_index.transform_keys { |k| k.to_s.strip.downcase }
-
-      # Build exact replacement hashes based on actual incoming tokens
-      program_replacements = {}
-      prog_vals.each do |val|
-        key = val.to_s
-        match = programs_index[key] || programs_index_ci[key.strip.downcase]
-        program_replacements[key] = match if match.present?
-      end
-      importer.batch_replace(:program_id, program_replacements) if program_replacements.any?
-
-      department_replacements = {}
-      dept_vals.each do |val|
-        key = val.to_s
-        match = departments_index[key] || departments_index_ci[key.strip.downcase]
-        department_replacements[key] = match if match.present?
-      end
-      importer.batch_replace(:department_id, department_replacements) if department_replacements.any?
-
-      section_replacements = {}
-      sec_vals.each do |val|
-        key = val.to_s
-        match = sections_index[key] || sections_index_ci[key.strip.downcase]
-        section_replacements[key] = match if match.present?
-      end
-      importer.batch_replace(:section_id, section_replacements) if section_replacements.any?
-
-      # Handle plaintext password: now under :encrypted_password due to header rewrite
-      pw_vals = importer.values_at(:encrypted_password).flatten.compact.map { |v| v.to_s }.uniq
-      if pw_vals.any?
-        pw_map = {}
-        pw_vals.each do |plain|
-          next if plain.blank?
-          pw_map[plain] = Devise::Encryptor.digest(Student, plain)
+      'Student ID' => :student_id,
+      'First Name' => :first_name,
+      'Middle Name' => :middle_name,
+      'Last Name' => :last_name,
+      'Email' => :email,
+      'Student Password' => :student_password,
+      'Password' => :student_password,
+      'Gender' => :gender,
+      'Nationality' => :nationality,
+      'Date of Birth' => :date_of_birth,
+      'Place of Birth' => :place_of_birth,
+      'Marital Status' => :marital_status,
+      'Current Occupation' => :current_occupation,
+      'Old ID Number' => :old_id_number,
+      'Student ID Taken Status' => :student_id_taken_status,
+      'Program ID' => :program_id,
+      'Department ID' => :department_id,
+      'Section ID' => :section_id,
+      'Admission Type' => :admission_type,
+      'Study Level' => :study_level,
+      'Year' => :year,
+      'Semester' => :semester,
+      'Batch' => :batch,
+      'Curriculum Version' => :curriculum_version,
+      'Sponsorship Status' => :sponsorship_status,
+      'Account Verification Status' => :account_verification_status,
+      'Document Verification Status' => :document_verification_status,
+      'Account Status' => :account_status,
+      'Graduation Status' => :graduation_status,
+      'Graduation Year' => :graduation_year,
+      'Institution Transfer Status' => :institution_transfer_status,
+      'Payment Version' => :payment_version,
+      'Allow Editing' => :allow_editing,
+      'Created By' => :created_by,
+      'Last Updated By' => :last_updated_by
+    },
+    before_batch_import: proc { |import|
+      begin
+        rows = import.csv_lines
+        if rows.present? && rows.first.is_a?(Array)
+          headers = rows.first
+          # Locate a plaintext password column
+          pwd_idx = headers.index('student_password') || headers.index('Student Password') || headers.index('Password')
+          if pwd_idx
+            # Rename header to encrypted_password for proper assignment
+            headers[pwd_idx] = 'encrypted_password'
+            (1...rows.length).each do |r|
+              plain = rows[r][pwd_idx].to_s.strip
+              plain = SecureRandom.hex(8) if plain.blank?
+              encrypted = if defined?(Devise::Encryptor)
+                            Devise::Encryptor.digest(Student, plain)
+                          else
+                            Student.new(password: plain).encrypted_password
+                          end
+              rows[r][pwd_idx] = encrypted
+            end
+          end
         end
-        importer.batch_replace(:encrypted_password, pw_map) if pw_map.any?
+      rescue StandardError => e
+        Rails.logger.warn "[students import] password preprocessing failed: #{e.message}"
       end
     }
+  )
 
   batch_action 'Approve document verification status for', method: :put, confirm: 'Are you sure?' do |ids|
     Student.where(id: ids).update(document_verification_status: 'approved')
@@ -114,20 +119,13 @@ ActiveAdmin.register Student do
     end
 
     def scoped_collection
-      super.where(institution_transfer_status: ['approved', nil])
+      super.includes(:school_or_university_information)
+           .where(institution_transfer_status: ['approved', nil])
     end
   end
 
-  def scoped_collection
-    super.includes(:school_or_university_information, :curriculum)
-  end
-
-   # Custom CSV export action for 'registrar stat'
-   ActiveAdmin.register Student do
-    # Existing code...
-
-    # Custom CSV export action for 'registrar stat'
-     collection_action :export_registrar_stat_csv, method: :get do
+  # Custom CSV export action for 'registrar stat'
+  collection_action :export_registrar_stat_csv, method: :get do
        csv_data = CSV.generate(headers: true) do |csv|
          # Header row
          csv << ['Hope Enterprise University College/Office of the Registrar Statistics for Regular and Extension Students']
@@ -249,13 +247,12 @@ ActiveAdmin.register Student do
        end
 
        send_data csv_data, filename: 'registrar_stat.csv'
-     end
+  end
 
-    # Add a link to the 'registrar stat' CSV export in the index page
-     action_item :export_registrar_stat_csv, only: :index do
-       link_to 'Export Registrar Stat CSV', export_registrar_stat_csv_admin_students_path, method: :get
-     end
-   end
+  # Add a link to the 'registrar stat' CSV export in the index page
+  action_item :export_registrar_stat_csv, only: :index do
+    link_to 'Export Registrar Stat CSV', export_registrar_stat_csv_admin_students_path, method: :get
+  end
 
   csv do
     serial = 0

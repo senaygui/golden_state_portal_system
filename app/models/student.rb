@@ -1,4 +1,5 @@
 class Student < ApplicationRecord
+  
   # #callbacks
   before_save :attributies_assignment
   before_save :student_id_generator
