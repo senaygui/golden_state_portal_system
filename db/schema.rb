@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_10_29_085813) do
+ActiveRecord::Schema[7.0].define(version: 2025_11_03_054500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -1410,9 +1410,11 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_29_085813) do
     t.uuid "section_id"
     t.integer "section_status", default: 0
     t.date "graduation_date"
+    t.boolean "force_password_change", default: false, null: false
     t.index ["academic_calendar_id"], name: "index_students_on_academic_calendar_id"
     t.index ["department_id"], name: "index_students_on_department_id"
     t.index ["email"], name: "index_students_on_email", unique: true
+    t.index ["force_password_change"], name: "index_students_on_force_password_change"
     t.index ["program_id"], name: "index_students_on_program_id"
     t.index ["reset_password_token"], name: "index_students_on_reset_password_token", unique: true
     t.index ["section_id"], name: "index_students_on_section_id"

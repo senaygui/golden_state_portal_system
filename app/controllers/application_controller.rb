@@ -66,7 +66,7 @@ class ApplicationController < ActionController::Base
         student_address_attributes: student_address_attrs,
         emergency_contact_attributes: emergency_contact_attrs,
         school_or_university_information_attributes: school_or_university_information_attrs,
-        course_exemptions_attributes: [:id, :course_taken, :letter_grade, :credit_hour, :_destroy]
+        course_exemptions_attributes: %i[id course_taken letter_grade credit_hour _destroy]
       )
     end
 

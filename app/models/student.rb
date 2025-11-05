@@ -1,5 +1,4 @@
 class Student < ApplicationRecord
-  
   # #callbacks
   before_save :attributies_assignment
   before_save :student_id_generator
@@ -85,7 +84,7 @@ class Student < ApplicationRecord
   scope :no_section, -> { where(section_id: nil) }
 
   def get_current_courses
-    all_courses = program.curriculums.where(active_status: 'active', batch: batch, curriculum_version: curriculum_version).first.courses
+    all_courses = program.curriculums.where(active_status: 'active', batch:, curriculum_version:).first.courses
                          .where(year:, semester:)
                          .order('year ASC', 'semester ASC')
 
@@ -296,8 +295,9 @@ class Student < ApplicationRecord
           admission_type: program.admission_type,
           study_level: program.study_level,
           # curriculum_version: program.curriculums.where(active_status: "active").last.curriculum_version,
-          curriculum_version: program.curriculums.where(active_status: 'active', batch: batch).order(curriculum_active_date: :desc).first.curriculum_version,
-          payment_version: program.payments.order('created_at DESC').first.version,
+          curriculum_version: program.curriculums.where(active_status: 'active',
+                                                        batch:).order(curriculum_active_date: :desc).first.curriculum_version,
+          payment_version: program.payments.order('created_at DESC').first.version
           # batch: academic_calendar.batch || academic_calendar.calender_year_in_gc
         )
       end
@@ -335,7 +335,7 @@ class Student < ApplicationRecord
 
   def student_course_assign
     if student_courses.empty? && document_verification_status == 'approved' && program.entrance_exam_requirement_status == false
-      program.curriculums.where(curriculum_version:,active_status: 'active', batch: batch).last.courses.each do |course|
+      program.curriculums.where(curriculum_version:, active_status: 'active', batch:).last.courses.each do |course|
         StudentCourse.create do |student_course|
           student_course.student_id = id
           student_course.course_id = course.id
@@ -349,7 +349,7 @@ class Student < ApplicationRecord
         end
       end
     elsif student_courses.empty? && program.entrance_exam_requirement_status == true && document_verification_status == 'approved' && entrance_exam_result_status == 'Pass'
-      program.curriculums.where(curriculum_version:,active_status: 'active', batch: batch).last.courses.each do |course|
+      program.curriculums.where(curriculum_version:, active_status: 'active', batch:).last.courses.each do |course|
         StudentCourse.create do |student_course|
           student_course.student_id = id
           student_course.course_id = course.id

@@ -4,74 +4,25 @@ ActiveAdmin.register Student do
   permit_params :department_id, :section_id, :payment_version, :password_confirmation, :encrypted_password, :batch, :nationality, :undergraduate_transcript, :highschool_transcript,
                 :grade_10_matric, :grade_12_matric, :coc, :diploma_certificate, :degree_certificate, :place_of_birth, :sponsorship_status, :entrance_exam_result_status, :student_id_taken_status, :old_id_number, :curriculum_version, :current_occupation, :tempo_status, :created_by, :last_updated_by, :photo, :email, :password, :first_name, :last_name, :middle_name, :gender, :student_id, :date_of_birth, :program_id, :department, :admission_type, :study_level, :marital_status, :year, :semester, :account_verification_status, :document_verification_status, :account_status, :graduation_status, student_address_attributes: %i[id country city region zone sub_city house_number special_location moblie_number telephone_number pobox woreda created_by last_updated_by], emergency_contact_attributes: %i[id full_name relationship cell_phone email current_occupation name_of_current_employer pobox email_of_employer office_phone_number created_by last_updated_by], school_or_university_information_attributes: %i[id level coc_attendance_date college_or_university phone_number address field_of_specialization cgpa last_attended_high_school school_address grade_10_result grade_10_exam_taken_year grade_12_exam_result grade_12_exam_taken_year created_by updated_by coc_id tvet letter_of_equivalence entrance_exam_id]
 
-  active_admin_import(
-    validate: false,
-    timestamps: true,
-    batch_size: 1000,
-    headers_rewrites: {
-      'Student ID' => :student_id,
-      'First Name' => :first_name,
-      'Middle Name' => :middle_name,
-      'Last Name' => :last_name,
-      'Email' => :email,
-      'Student Password' => :student_password,
-      'Password' => :student_password,
-      'Gender' => :gender,
-      'Nationality' => :nationality,
-      'Date of Birth' => :date_of_birth,
-      'Place of Birth' => :place_of_birth,
-      'Marital Status' => :marital_status,
-      'Current Occupation' => :current_occupation,
-      'Old ID Number' => :old_id_number,
-      'Student ID Taken Status' => :student_id_taken_status,
-      'Program ID' => :program_id,
-      'Department ID' => :department_id,
-      'Section ID' => :section_id,
-      'Admission Type' => :admission_type,
-      'Study Level' => :study_level,
-      'Year' => :year,
-      'Semester' => :semester,
-      'Batch' => :batch,
-      'Curriculum Version' => :curriculum_version,
-      'Sponsorship Status' => :sponsorship_status,
-      'Account Verification Status' => :account_verification_status,
-      'Document Verification Status' => :document_verification_status,
-      'Account Status' => :account_status,
-      'Graduation Status' => :graduation_status,
-      'Graduation Year' => :graduation_year,
-      'Institution Transfer Status' => :institution_transfer_status,
-      'Payment Version' => :payment_version,
-      'Allow Editing' => :allow_editing,
-      'Created By' => :created_by,
-      'Last Updated By' => :last_updated_by
-    },
-    before_batch_import: proc { |import|
-      begin
-        rows = import.csv_lines
-        if rows.present? && rows.first.is_a?(Array)
-          headers = rows.first
-          # Locate a plaintext password column
-          pwd_idx = headers.index('student_password') || headers.index('Student Password') || headers.index('Password')
-          if pwd_idx
-            # Rename header to encrypted_password for proper assignment
-            headers[pwd_idx] = 'encrypted_password'
-            (1...rows.length).each do |r|
-              plain = rows[r][pwd_idx].to_s.strip
-              plain = SecureRandom.hex(8) if plain.blank?
-              encrypted = if defined?(Devise::Encryptor)
-                            Devise::Encryptor.digest(Student, plain)
-                          else
-                            Student.new(password: plain).encrypted_password
-                          end
-              rows[r][pwd_idx] = encrypted
-            end
-          end
-        end
-      rescue StandardError => e
-        Rails.logger.warn "[students import] password preprocessing failed: #{e.message}"
-      end
-    }
-  )
+                active_admin_import :validate => false,
+                :before_batch_import => proc { |import|
+                  import.csv_lines.length.times do |i|
+                    import.csv_lines[i][3] = Student.new(:password => import.csv_lines[i][3]).encrypted_password
+                  end
+                },
+                                        # :template_object => ActiveAdminImport::Model.new(
+                                        #     :hint => "file will be imported with such header format: 'email', 'first_name','last_name','encrypted_password','middle_name','gender','student_id','date_of_birth','program_id','department','admission_type','study_level','marital_status','year','semester','account_verification_status','document_verification_status','account_status','graduation_status','student_password'"
+                                        # ),
+                                        :timestamps=> true,
+                                        :batch_size => 1000
+                                        scoped_collection_action :scoped_collection_update, form: -> do
+                                         {
+                                          program_id: Program.all.map { |program| [program.program_name, program.id] },
+            
+                                          account_status: 'text',
+                                          semester: 'text'
+                                        }
+                                      end
 
   batch_action 'Approve document verification status for', method: :put, confirm: 'Are you sure?' do |ids|
     Student.where(id: ids).update(document_verification_status: 'approved')
