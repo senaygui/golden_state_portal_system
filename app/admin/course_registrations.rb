@@ -71,7 +71,29 @@ ActiveAdmin.register CourseRegistration do
     end
     redirect_to collection_path, notice: "Grade Sheet Is Generated Successfully"
   end
-
+  filter :student_id, as: :search_select_filter, url: proc { admin_students_path },
+                      fields: %i[student_id id], display_name: 'student_id', minimum_input_length: 2,
+                      order_by: 'id_asc'
+  filter :student_full_name
+  filter :program_id, as: :search_select_filter, url: proc { admin_programs_path },
+                      fields: %i[program_name id], display_name: 'program_name', minimum_input_length: 2,
+                      order_by: 'id_asc'
+  filter :department_id, as: :search_select_filter, url: proc { admin_departments_path },
+                         fields: %i[department_name id], display_name: 'department_name', minimum_input_length: 2,
+                         order_by: 'id_asc'
+  filter :course_id, as: :search_select_filter, url: proc { admin_courses_path },
+                     fields: %i[course_code id], display_name: 'course_code', minimum_input_length: 2,
+                     order_by: 'id_asc'
+  filter :course_title
+  filter :academic_calendar_id, as: :search_select_filter, url: proc { admin_academic_calendars_path },
+                                fields: %i[calender_year id], display_name: 'calender_year', minimum_input_length: 2,
+                                order_by: 'id_asc'
+  filter :semester
+  filter :year
+  filter :course_section_id, as: :search_select_filter, url: proc { admin_course_sections_path },
+                             fields: %i[course_section_name id], display_name: 'course_section_name', minimum_input_length: 2,
+                             order_by: 'id_asc'
+  filter :enrollment_status
   index do
     selectable_column
     column "Student Name" do |s|
