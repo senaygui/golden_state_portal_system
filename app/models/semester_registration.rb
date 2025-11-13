@@ -250,9 +250,9 @@ class SemesterRegistration < ApplicationRecord
           academic_calendar_id:,
           student_id: student.id,
           student_full_name: student.full_name,
-          course_id: course.id,
+          course_id: course.course_id,
           academic_year: get_academic_year(semester, student),
-          course_title: course.course_title,
+          course_title: course.course.course_title,
           semester:,
           year:,
           created_by:
