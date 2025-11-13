@@ -84,14 +84,13 @@ class Student < ApplicationRecord
   scope :no_section, -> { where(section_id: nil) }
 
   def get_current_courses
-    all_courses = program.curriculums.where(active_status: 'active', batch:, curriculum_version:).first.courses
-                         .where(year:, semester:)
-                         .order('year ASC', 'semester ASC')
+    all_courses = program.curriculums.where(active_status: 'active', curriculum_version:).first.curriculum_course_offerings
+                         .where(batch:).first.course_offering_courses.where(year:, semester:).order('year ASC', 'semester ASC')
 
     # Filter out courses where the student hasn't met the prerequisites
     all_courses.select do |course|
-      passed_all_prerequisites?(self, course) &&
-        !course_exemptions.where(exemption_approval: 'Approved').exists?(course_id: course.id)
+      passed_all_prerequisites?(self, course.course) &&
+        !course_exemptions.where(exemption_approval: 'Approved').exists?(course_id: course.course.id)
     end
   end
 
@@ -295,8 +294,7 @@ class Student < ApplicationRecord
           admission_type: program.admission_type,
           study_level: program.study_level,
           # curriculum_version: program.curriculums.where(active_status: "active").last.curriculum_version,
-          curriculum_version: program.curriculums.where(active_status: 'active',
-                                                        batch:).order(curriculum_active_date: :desc).first.curriculum_version,
+          curriculum_version: program.curriculums.where(active_status: 'active').order(curriculum_active_date: :desc).first.curriculum_version,
           payment_version: program.payments.order('created_at DESC').first.version
           # batch: academic_calendar.batch || academic_calendar.calender_year_in_gc
         )
@@ -335,30 +333,33 @@ class Student < ApplicationRecord
 
   def student_course_assign
     if student_courses.empty? && document_verification_status == 'approved' && program.entrance_exam_requirement_status == false
-      program.curriculums.where(curriculum_version:, active_status: 'active', batch:).last.courses.each do |course|
+      program.curriculums.where(curriculum_version:, active_status: 'active').last.curriculum_course_offerings
+                         .where(batch:).first.course_offering_courses.where(year:, semester:).order('year ASC', 'semester ASC').each do |course_offering_course|
         StudentCourse.create do |student_course|
           student_course.student_id = id
-          student_course.course_id = course.id
-          student_course.course_title = course.course_title
-          student_course.semester = course.semester
-          student_course.year = course.year
-          student_course.credit_hour = course.credit_hour
-          student_course.ects = course.ects
-          student_course.course_code = course.course_code
+          student_course.course_id = course_offering_course.course_id
+          student_course.course_title = course_offering_course.course.course_title
+          student_course.semester = course_offering_course.semester
+          student_course.year = course_offering.year
+          student_course.credit_hour = course_offering.course.credit_hour
+          student_course.ects = course_offering.course.ects
+          student_course.course_code = course_offering.course.course_code
           student_course.created_by = created_by
         end
       end
     elsif student_courses.empty? && program.entrance_exam_requirement_status == true && document_verification_status == 'approved' && entrance_exam_result_status == 'Pass'
-      program.curriculums.where(curriculum_version:, active_status: 'active', batch:).last.courses.each do |course|
+      program.curriculums.where(curriculum_version:, active_status: 'active').last.curriculum_course_offerings
+                         .where(batch:).first.course_offering_courses.where(year:, semester:).order('year ASC', 'semester ASC').each do |course_offering_course|
         StudentCourse.create do |student_course|
           student_course.student_id = id
-          student_course.course_id = course.id
-          student_course.course_title = course.course_title
-          student_course.semester = course.semester
-          student_course.year = course.year
-          student_course.credit_hour = course.credit_hour
-          student_course.ects = course.ects
-          student_course.course_code = course.course_code
+          student_course.course_id = course_offering_course.course_id
+          student_course.course_title = course_offering_course.course.course_title
+          student_course.semester = course_offering_course.semester
+          student_course.year = course_offering.year
+          student_course.credit_hour = course_offering.course.credit_hour
+          student_course.ects = course_offering.course.ects
+          student_course.course_code = course_offering.course.course_code
+          student_course.created_by = created_by
         end
       end
     end

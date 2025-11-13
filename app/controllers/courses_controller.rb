@@ -1,8 +1,8 @@
 class CoursesController < ApplicationController
     def index
         student_curriculum = current_student.program.curriculums.find_by(curriculum_version: current_student.curriculum_version)
-        @courses = Course.includes(:program, :curriculum)
-                         .where(program: current_student.program, curriculum: student_curriculum, year: current_student.year, semester: current_student.semester)
+        course_offering = CurriculumCourseOffering.find_by(program: current_student.program, curriculum: student_curriculum, batch: current_student.batch)
+        @courses = CourseOfferingCourse.where(curriculum_course_offering_id: course_offering.id, year: current_student.year, semester: current_student.semester)
     end
 
       # Other actions can be added here (show, new, edit, create, update, destroy)

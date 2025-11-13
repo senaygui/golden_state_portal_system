@@ -1,5 +1,5 @@
 ActiveAdmin.register Curriculum do
-menu parent: "Program",label: "CourseOffering-Curriculum"
+menu parent: "Program"
  #permit_params :program_id,:curriculum_title,:curriculum_version,:total_course,:total_ects,:total_credit_hour,:active_status,:curriculum_active_date,:depreciation_date,:created_by,:last_updated_by, courses_attributes: [:id,:course_module_id,:program_id,:curriculum_id,:semester,:course_starting_date,:course_ending_date,:year,:credit_hour,:lecture_hour,:lab_hour,:ects,:course_code,:course_title,:created_by,:last_updated_by, :_destroy]
  permit_params :batch,:program_id, :curriculum_title, :curriculum_version, :total_course, :total_ects, 
               :total_credit_hour, :active_status, :curriculum_active_date, :depreciation_date, 
@@ -20,7 +20,7 @@ menu parent: "Program",label: "CourseOffering-Curriculum"
   selectable_column
   column :curriculum_title
   column  "Version",:curriculum_version
-  column :batch
+  # column :batch
   column "Program", sortable: true do |d|
     link_to d.program.program_name, [:admin, d.program]
   end
@@ -41,7 +41,7 @@ fields: [:program_name, :id], display_name: 'program_name', minimum_input_length
 order_by: 'id_asc'
 filter :curriculum_title
 filter :curriculum_version
-filter :batch
+# filter :batch
 filter :total_course
 
 #filter :total_ects
@@ -129,29 +129,30 @@ filter :updated_at
                                             academic_statuses_attributes: [:id, :status, :min_value, 
                                                                            :max_value, :_destroy]]
   
-                                                                           controller do
-                                                                            def create
-                                                                              @curriculum = Curriculum.new(permitted_params[:curriculum])
-                                                                          
-                                                                              # Save the curriculum first
-                                                                              if @curriculum.save
-                                                                                # Ensure courses are saved with the curriculum_id
-                                                                                @curriculum.courses.each do |course|
-                                                                                  course.update(curriculum_id: @curriculum.id)
-                                                                                end
-                                                                          
-                                                                                # Ensure grade systems are saved with the curriculum_id
-                                                                                @curriculum.grade_systems.each do |grade_system|
-                                                                                  grade_system.update(curriculum_id: @curriculum.id)
-                                                                                end
-                                                                          
-                                                                                redirect_to admin_curriculum_path(@curriculum), notice: "Curriculum was successfully created."
-                                                                              else
-                                                                                render :new
-                                                                              end
-                                                                            end
-                                                                          end
-                                                                        end
+  controller do
+    def create
+      @curriculum = Curriculum.new(permitted_params[:curriculum])
+
+        # Save the curriculum first
+        if @curriculum.save
+          # Ensure courses are saved with the curriculum_id
+          @curriculum.courses.each do |course|
+            course.update(curriculum_id: @curriculum.id)
+          end
+
+          # Ensure grade systems are saved with the curriculum_id
+          @curriculum.grade_systems.each do |grade_system|
+            grade_system.update(curriculum_id: @curriculum.id)
+          end
+
+          redirect_to admin_curriculum_path(@curriculum), 
+          notice: "Curriculum was successfully created."
+        else
+           render :new
+        end
+      end
+    end
+  end
                                                                           
   
 
@@ -165,19 +166,19 @@ filter :updated_at
         order_by: 'id_asc'
       f.input :curriculum_title
       f.input :curriculum_version
-      f.input :batch, as: :select, collection: [
-                '2019/2020',
-                '2020/2021',
-                '2021/2022',
-                '2022/2023',
-                '2023/2024',
-                '2024/2025',
-                '2025/2026',
-                '2026/2027',
-                '2027/2028',
-                '2028/2029',
-                '2029/2030'
-              ], include_blank: false
+      # f.input :batch, as: :select, collection: [
+      #           '2019/2020',
+      #           '2020/2021',
+      #           '2021/2022',
+      #           '2022/2023',
+      #           '2023/2024',
+      #           '2024/2025',
+      #           '2025/2026',
+      #           '2026/2027',
+      #           '2027/2028',
+      #           '2028/2029',
+      #           '2029/2030'
+      #         ], include_blank: false
       f.input :total_course
       f.input :total_ects
       f.input :total_credit_hour
@@ -252,7 +253,7 @@ filter :updated_at
             end
             row :curriculum_title
             row :curriculum_version
-            row :batch
+            # row :batch
             row :total_course
             row :total_ects
             row :total_credit_hour
