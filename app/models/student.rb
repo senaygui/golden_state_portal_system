@@ -340,10 +340,10 @@ class Student < ApplicationRecord
           student_course.course_id = course_offering_course.course_id
           student_course.course_title = course_offering_course.course.course_title
           student_course.semester = course_offering_course.semester
-          student_course.year = course_offering.year
-          student_course.credit_hour = course_offering.course.credit_hour
-          student_course.ects = course_offering.course.ects
-          student_course.course_code = course_offering.course.course_code
+          student_course.year = course_offering_course.year
+          student_course.credit_hour = course_offering_course.course.credit_hour
+          student_course.ects = course_offering_course.course.ects
+          student_course.course_code = course_offering_course.course.course_code
           student_course.created_by = created_by
         end
       end
@@ -355,10 +355,10 @@ class Student < ApplicationRecord
           student_course.course_id = course_offering_course.course_id
           student_course.course_title = course_offering_course.course.course_title
           student_course.semester = course_offering_course.semester
-          student_course.year = course_offering.year
-          student_course.credit_hour = course_offering.course.credit_hour
-          student_course.ects = course_offering.course.ects
-          student_course.course_code = course_offering.course.course_code
+          student_course.year = course_offering_course.year
+          student_course.credit_hour = course_offering_course.course.credit_hour
+          student_course.ects = course_offering_course.course.ects
+          student_course.course_code = course_offering_course.course.course_code
           student_course.created_by = created_by
         end
       end
