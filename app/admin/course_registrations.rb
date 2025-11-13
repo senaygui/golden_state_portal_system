@@ -90,8 +90,8 @@ ActiveAdmin.register CourseRegistration do
                                 order_by: 'id_asc'
   filter :semester
   filter :year
-  filter :course_section_id, as: :search_select_filter, url: proc { admin_course_sections_path },
-                             fields: %i[course_section_name id], display_name: 'course_section_name', minimum_input_length: 2,
+  filter :section_id, as: :search_select_filter, url: proc { admin_course_sections_path },
+                             fields: %i[section_full_name id], display_name: 'section_full_name', minimum_input_length: 2,
                              order_by: 'id_asc'
   filter :enrollment_status
   index do
