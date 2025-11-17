@@ -173,7 +173,7 @@ class Student < ApplicationRecord
     return nil if payment.nil?
 
     base_fee = get_current_courses.collect do |oi|
-      fee = oi.valid? ? (payment.tution_per_credit_hr * oi.credit_hour) : 0
+      fee = oi.valid? ? (payment.tution_per_credit_hr * oi.course.credit_hour) : 0
       puts "Course: #{oi.inspect}, Fee: #{fee}"
       fee
     end.sum
@@ -289,6 +289,7 @@ class Student < ApplicationRecord
 
       if academic_calendar.present?
         update_columns(
+          batch: academic_calendar.batch,
           academic_calendar_id: academic_calendar.id,
           department_id: program.department_id,
           admission_type: program.admission_type,

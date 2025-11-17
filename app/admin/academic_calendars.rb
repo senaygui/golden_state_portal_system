@@ -1,5 +1,5 @@
 ActiveAdmin.register AcademicCalendar do
-  permit_params :created_at, :calender_year_in_gc, :calender_year_in_ec, :calender_year, :starting_date, :ending_date,
+  permit_params :batch,:created_at, :calender_year_in_gc, :calender_year_in_ec, :calender_year, :starting_date, :ending_date,
                 :admission_type, :study_level, :remark, :from_year, :to_year, :last_updated_by, :created_by, activities_attributes: %i[id activity semester description category starting_date ending_date last_updated_by created_by _destroy], semesters_attributes: %i[id semester starting_date ending_date _destroy]
 
   menu parent: 'College', priority: 2
@@ -75,7 +75,19 @@ ActiveAdmin.register AcademicCalendar do
       f.input :study_level, as: :select, collection: %w[undergraduate graduate]
       f.input :from_year
       f.input :to_year
-      f.input :batch
+      f.input :batch, as: :select, collection: [
+                '2019/2020',
+                '2020/2021',
+                '2021/2022',
+                '2022/2023',
+                '2023/2024',
+                '2024/2025',
+                '2025/2026',
+                '2026/2027',
+                '2027/2028',
+                '2028/2029',
+                '2029/2030'
+              ], include_blank: true
       f.input :remark
       f.input :created_at, as: :date_time_picker
       if f.object.new_record?

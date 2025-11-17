@@ -70,8 +70,7 @@ ActiveAdmin.register Student do
     end
 
     def scoped_collection
-      super.includes(:school_or_university_information)
-           .where(institution_transfer_status: ['approved', nil])
+      super.order(created_at: :desc).where(institution_transfer_status: ['approved', nil])
     end
   end
 
@@ -385,7 +384,7 @@ ActiveAdmin.register Student do
                 '2027/2028',
                 '2028/2029',
                 '2029/2030'
-              ], include_blank: false
+              ], include_blank: true
       f.input :section, as: :select, collection: Section.all.pluck(:section_full_name, :id)
       if f.object.new_record?
         f.input :created_by, as: :hidden, input_html: { value: current_admin_user.name.full }

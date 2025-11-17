@@ -42,8 +42,7 @@ ActiveAdmin.register StudentGrade do
                          before_batch_import: lambda { |importer|
                                                  student_ids = importer.values_at(:student_id)
                                                  # replacing author name with author id
-                                                 students = Student.where(student_id: student_ids).pluck(:student_id,
-                                                                                                         :id)
+                                                 students = Student.where(student_id: student_ids).pluck(:student_id, :id)
                                                  options = Hash[*students.flatten] # #{"Jane" => 2, "John" => 1}
                                                  importer.batch_replace(:student_id, options)
                                               }
