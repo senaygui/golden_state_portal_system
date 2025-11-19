@@ -231,6 +231,9 @@ ActiveAdmin.register SemesterRegistration do
     column 'Full Name', sortable: 'students.first_name' do |n|
       [n.student.first_name, n.student.middle_name, n.student.last_name].compact.join(' ')
     end
+    column 'Mother Section', sortable: true do |n|
+      link_to n.student.section.section_full_name, admin_program_section_path(n.student.section) if n.student.section.present?
+    end
     column 'Program' do |n|
       n.program.program_name
     end
@@ -249,6 +252,7 @@ ActiveAdmin.register SemesterRegistration do
     column 'Section', sortable: true do |n|
       link_to n.section.section_full_name, admin_program_section_path(n.section) if n.section.present?
     end
+    
     # column :mode_of_payment
     column 'Created At', sortable: true do |c|
       c.created_at.strftime('%b %d, %Y')

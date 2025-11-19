@@ -118,10 +118,10 @@ class Student < ApplicationRecord
     where(graduation_status: status).includes(:department)
   end
 
-  # def get_registration_fee
-  #  return nil if program_payment.nil?
-  #  program_payment.registration_fee
-  # end
+  def get_registration_fee
+   return nil if program_payment.nil?
+   program_payment.registration_fee
+  end
 
   def program_payment
     puts "Program ID: #{program_id}"
