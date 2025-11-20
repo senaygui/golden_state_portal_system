@@ -57,10 +57,10 @@ class SemesterRegistration < ApplicationRecord
        # ###report.total_grade_point = self.course_registrations.where(enrollment_status: "enrolled").collect { |oi| (!!(oi.student_grade&.letter_grade != "I") && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != "NG")) ? (oi.student_grade.grade_point) : 0 }.sum
 
         report.total_credit_hour = course_registrations.where(enrollment_status: 'enrolled').collect do |oi|
-          !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? oi.course.credit_hour : 0
+          !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? oi.course.credit_hour.to_i : 0
         end.sum
         report.total_grade_point = course_registrations.where(enrollment_status: 'enrolled').collect do |oi|
-          !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? oi.student_grade.grade_point : 0
+          !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? oi.student_grade.grade_point.to_f : 0
         end.sum
 
         if student.grade_reports.empty?
@@ -75,10 +75,10 @@ class SemesterRegistration < ApplicationRecord
 
           report.total_course = course_registrations.count
           report.total_credit_hour = course_registrations.where(enrollment_status: 'enrolled').collect do |oi|
-            !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? oi.course.credit_hour : 0
+            !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? oi.course.credit_hour.to_i : 0
           end.sum
           report.total_grade_point = course_registrations.where(enrollment_status: 'enrolled').collect do |oi|
-            !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? (oi.course.credit_hour * oi.student_grade.grade_point) : 0
+            !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? (oi.course.credit_hour.to_i * oi.student_grade.grade_point.to_f) : 0
           end.sum
           # report.total_grade_point = self.course_registrations.collect { |oi| ((oi.student_grade.letter_grade != "I") && (oi.student_grade.letter_grade != "NG")) ? (oi.course.credit_hour * oi.student_grade.grade_point) : 0 }.sum
 
@@ -124,10 +124,10 @@ class SemesterRegistration < ApplicationRecord
           # report.sgpa = report.total_credit_hour == 0 ? 0 : (report.total_grade_point / report.total_credit_hour).round(2)report.total_grade_point = self.course_registrations.collect { |oi| ((oi.student_grade.letter_grade != "I") && (oi.student_grade.letter_grade != "NG")) ? (oi.course.credit_hour * oi.student_grade.grade_point) : 0 }.sum
 
           report.total_credit_hour = course_registrations.where(enrollment_status: 'enrolled').collect do |oi|
-            !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? oi.course.credit_hour : 0
+            !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? oi.course.credit_hour.to_i : 0
           end.sum
           report.total_grade_point = course_registrations.where(enrollment_status: 'enrolled').collect do |oi|
-            !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? (oi.course.credit_hour * oi.student_grade.grade_point) : 0
+            !!(oi.student_grade&.letter_grade != 'I') && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != 'NG') ? (oi.course.credit_hour.to_i * oi.student_grade.grade_point.to_f) : 0
           end.sum
           # report.total_grade_point = self.course_registrations.where(enrollment_status: "enrolled").collect { |oi|
           # (!!(oi.student_grade&.letter_grade != "I") && oi.student_grade.present? && !!(oi.student_grade&.letter_grade != "NG")) ? (oi.course.credit_hour * oi.student_grade.grade_point) : 0}.sum
@@ -135,7 +135,7 @@ class SemesterRegistration < ApplicationRecord
           dedcated_credit_hour = course_registrations.joins(:student_grade).where(enrollment_status: 'enrolled').where.not(add_course_id: nil).where.not(student_grades: { letter_grade: %w[
                                                                                                                                                            NG I
                                                                                                                                                          ] }).map do |course|
-            course.course.credit_hour
+            course.course.credit_hour.to_i
           end.sum || 0
 
           report.cumulative_total_credit_hour = (student.grade_reports.order('created_at DESC').first.cumulative_total_credit_hour + report.total_credit_hour) - dedcated_credit_hour
