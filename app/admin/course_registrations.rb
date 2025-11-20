@@ -119,6 +119,7 @@ ActiveAdmin.register CourseRegistration do
   end
 
   csv do
+    column :id
     column('Student Name') { |s| s.student.name.full }
     column('Academic Year') { |s| s.get_academic_year }
     column('Student ID') { |c| c.student.student_id }
