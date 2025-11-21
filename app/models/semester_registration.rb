@@ -100,7 +100,7 @@ class SemesterRegistration < ApplicationRecord
                                        AddAcademicStatus.academic_status({ sgpa: report.sgpa, cgpa: report.cgpa },
                                                                                                   student)
                                      else
-                                       AcademicStatusGraduate.get_academic_status(report:, student:)
+                                       AcademicStatusGraduate.get_academic_status(report: report, student: student)
                                      end
 
             if report.academic_status.strip != 'Academic Dismissal' && report.academic_status.strip != 'Academic Suspension'
@@ -153,7 +153,7 @@ class SemesterRegistration < ApplicationRecord
               report.academic_status = AddAcademicStatus.academic_status({ sgpa: report.sgpa, cgpa: report.cgpa },
                                                                          student)
             else
-              report.academic_status = AcademicStatusGraduate.get_academic_status(report:, student:)
+              report.academic_status = AcademicStatusGraduate.get_academic_status(report: report, student: student)
               # report.academic_status = self.student.program.grade_systems.last.academic_statuses.where("min_value <= ?", report.cgpa).where("max_value >= ?", report.cgpa).last.status
             end
 
@@ -196,7 +196,7 @@ class SemesterRegistration < ApplicationRecord
   end
 
   def generate_invoice
-    if mode_of_payment.present? && invoices.where(year:, semester:).empty?
+    if mode_of_payment.present? && invoices.where(year: year, semester: semester).empty?
       update_columns(is_back_invoice_created: true)
       Invoice.create do |invoice|
         invoice.semester_registration_id = id
@@ -247,15 +247,15 @@ class SemesterRegistration < ApplicationRecord
           semester_registration_id: id,
           program_id: program.id,
           department_id: department.id,
-          academic_calendar_id:,
+          academic_calendar_id: academic_calendar_id,
           student_id: student.id,
           student_full_name: student.full_name,
           course_id: course.course_id,
           academic_year: get_academic_year(semester, student),
           course_title: course.course.course_title,
-          semester:,
-          year:,
-          created_by:
+          semester: semester,
+          year: year,
+          created_by: created_by
         )
 
         if course_registration.valid?
@@ -327,7 +327,7 @@ class SemesterRegistration < ApplicationRecord
     if semester == 1
       Date.current.year
     else
-      last_course_registration = CourseRegistration.select(:academic_year).where(student:).where(semester: 1).last
+      last_course_registration = CourseRegistration.select(:academic_year).where(student: student).where(semester: 1).last
       if last_course_registration.nil?
         # Handle the case where there's no previous course registration
         Date.current.year # or some other default value
@@ -339,7 +339,7 @@ class SemesterRegistration < ApplicationRecord
 
   def assign_section_to_course_registration
     if (registrar_approval_status == 'approved') && section.present?
-      course_registrations.where(section_id: nil).map { |course| course.update(section_id:) }
+      course_registrations.where(section_id: nil).map { |course| course.update(section_id: section_id) }
     end
   end
 end

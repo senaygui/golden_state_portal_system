@@ -95,7 +95,7 @@ class StudentGrade < ApplicationRecord
   end
 
   def self.online_student_grade(department, year, semester, status)
-    ids = Student.where(admission_type: 'online').where(department_id: department).where(year:).where(semester:).select('id')
+    ids = Student.where(admission_type: 'online').where(department_id: department).where(year: year).where(semester: semester).select('id')
     StudentGrade.where(student_id: ids).where(department_approval: status.strip).includes(:student).includes(:department)
   end
 
@@ -172,8 +172,14 @@ class StudentGrade < ApplicationRecord
         cumulative_total_credit_hour = total_credit_hour
         cumulative_total_grade_point = total_grade_point
         cgpa = cumulative_total_credit_hour == 0 ? 0 : (cumulative_total_grade_point / cumulative_total_credit_hour).round(1)
-        course_registration.semester_registration.grade_report.update(total_credit_hour:,
-                                                                      total_grade_point:, sgpa:, cumulative_total_credit_hour:, cumulative_total_grade_point:, cgpa:)
+        course_registration.semester_registration.grade_report.update(
+          total_credit_hour: total_credit_hour,
+          total_grade_point: total_grade_point,
+          sgpa: sgpa,
+          cumulative_total_credit_hour: cumulative_total_credit_hour,
+          cumulative_total_grade_point: cumulative_total_grade_point,
+          cgpa: cgpa
+        )
         if course_registration.semester_registration.course_registrations.joins(:student_grade).pluck(:letter_grade).include?('I').present? || course_registration.semester_registration.course_registrations.joins(:student_grade).pluck(:letter_grade).include?('NG').present?
           academic_status = 'Incomplete'
         else
@@ -193,7 +199,7 @@ class StudentGrade < ApplicationRecord
               student.update_columns(year: promoted_year)
             end
           end
-          course_registration.semester_registration.grade_report.update_columns(academic_status:)
+          course_registration.semester_registration.grade_report.update_columns(academic_status: academic_status)
         end
       else
         total_credit_hour = course_registration.semester_registration.course_registrations.where(enrollment_status: 'enrolled').collect do |oi|
@@ -204,16 +210,22 @@ class StudentGrade < ApplicationRecord
         end.sum
         sgpa = total_credit_hour == 0 ? 0 : (total_grade_point / total_credit_hour).round(2)
 
-        cumulative_total_credit_hour = GradeReport.where(student_id:).order('created_at ASC').last.cumulative_total_credit_hour + total_credit_hour
-        cumulative_total_grade_point = GradeReport.where(student_id:).order('created_at ASC').last.cumulative_total_grade_point + total_grade_point
+        cumulative_total_credit_hour = GradeReport.where(student_id: student_id).order('created_at ASC').last.cumulative_total_credit_hour + total_credit_hour
+        cumulative_total_grade_point = GradeReport.where(student_id: student_id).order('created_at ASC').last.cumulative_total_grade_point + total_grade_point
         cgpa = (cumulative_total_grade_point / cumulative_total_credit_hour).round(2)
 
         academic_status = program.grade_systems.last.academic_statuses.where('min_value <= ?', cgpa).where(
           'max_value >= ?', cgpa
         ).last.status
 
-        course_registration.semester_registration.grade_report.update(total_credit_hour:,
-                                                                      total_grade_point:, sgpa:, cumulative_total_credit_hour:, cumulative_total_grade_point:, cgpa:)
+        course_registration.semester_registration.grade_report.update(
+          total_credit_hour: total_credit_hour,
+          total_grade_point: total_grade_point,
+          sgpa: sgpa,
+          cumulative_total_credit_hour: cumulative_total_credit_hour,
+          cumulative_total_grade_point: cumulative_total_grade_point,
+          cgpa: cgpa
+        )
 
         if course_registration.semester_registration.course_registrations.joins(:student_grade).pluck(:letter_grade).include?('I').present? || course_registration.semester_registration.course_registrations.joins(:student_grade).pluck(:letter_grade).include?('NG').present?
           academic_status = 'Incomplete'
@@ -234,7 +246,7 @@ class StudentGrade < ApplicationRecord
               student.update_columns(year: promoted_year)
             end
           end
-          course_registration.semester_registration.grade_report.update_columns(academic_status:)
+          course_registration.semester_registration.grade_report.update_columns(academic_status: academic_status)
         end
       end
     end

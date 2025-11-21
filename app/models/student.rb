@@ -84,8 +84,8 @@ class Student < ApplicationRecord
   scope :no_section, -> { where(section_id: nil) }
 
   def get_current_courses
-    all_courses = program.curriculums.where(active_status: 'active', curriculum_version:).first.curriculum_course_offerings
-                         .where(batch:).first.course_offering_courses.where(year:, semester:).order('year ASC', 'semester ASC')
+    all_courses = program.curriculums.where(active_status: 'active', curriculum_version: curriculum_version).first.curriculum_course_offerings
+                         .where(batch: batch).first.course_offering_courses.where(year: year, semester: semester).order('year ASC', 'semester ASC')
 
     # Filter out courses where the student hasn't met the prerequisites
     all_courses.select do |course|
@@ -95,15 +95,15 @@ class Student < ApplicationRecord
   end
 
   def self.get_gc_students(graduation_status, graduation_year, program_id, study_level, admission_type)
-    where(graduation_status:).where(study_level:).where(graduation_year:).where(program_id:).where(admission_type:).includes(:department).includes(:grade_reports)
+    where(graduation_status: graduation_status).where(study_level: study_level).where(graduation_year: graduation_year).where(program_id: program_id).where(admission_type: admission_type).includes(:department).includes(:grade_reports)
   end
 
   def self.get_admitted_student(graduation_status, program_id, year, semester, study_level, admission_type)
-    where(graduation_status:).where(study_level:).where(year:).where(semester:).where(program_id:).where(admission_type:).includes(:program)
+    where(graduation_status: graduation_status).where(study_level: study_level).where(year: year).where(semester: semester).where(program_id: program_id).where(admission_type: admission_type).includes(:program)
   end
 
   def self.report_semester(year)
-    Student.distinct.where(year:).select(:semester)
+    Student.distinct.where(year: year).select(:semester)
   end
 
   def get_added_course
@@ -128,7 +128,7 @@ class Student < ApplicationRecord
     puts "Batch: #{batch.strip}" if batch
     puts "Admission Date: #{admission_date}"
 
-    payment = Payment.find_by(program_id:, batch: batch.strip)
+    payment = Payment.find_by(program_id: program_id, batch: batch.strip)
     puts "Program Payment: #{payment.inspect}"
     registration_date = admission_date
     payment
@@ -249,8 +249,8 @@ class Student < ApplicationRecord
       registration.student_full_name = "#{first_name.upcase} #{middle_name.upcase} #{last_name.upcase}"
       registration.student_id_number = student_id
       registration.created_by = "#{created_by}"
-      registration.academic_calendar_id = AcademicCalendar.where(study_level:,
-                                                                 admission_type:).order(:created_at).last.id
+      registration.academic_calendar_id = AcademicCalendar.where(study_level: study_level,
+                                                                 admission_type: admission_type).order(:created_at).last.id
       registration.year = year
       registration.semester = semester
       registration.program_name = program.program_name
@@ -315,12 +315,12 @@ class Student < ApplicationRecord
     if document_verification_status == 'approved' && !student_id.present?
       begin
         self.student_id = "#{program.program_code}/#{SecureRandom.random_number(1000..10_000)}/#{Time.now.strftime('%y')}"
-      end while Student.where(student_id:).exists?
+      end while Student.where(student_id: student_id).exists?
     end
   end
 
   def student_semester_registration
-    if document_verification_status == 'approved' && year == 1 && semester == 1 && program.entrance_exam_requirement_status == false && semester_registrations.find_by(semester:).nil?
+    if document_verification_status == 'approved' && year == 1 && semester == 1 && program.entrance_exam_requirement_status == false && semester_registrations.find_by(semester: semester).nil?
       # main one........if self.document_verification_status == "approved" && self.semester_registrations.empty? && self.year == 1 && self.semester == 1 && self.program.entrance_exam_requirement_status == false
       add_student_registration
     end
@@ -333,8 +333,8 @@ class Student < ApplicationRecord
 
   def student_course_assign
     if student_courses.empty? && document_verification_status == 'approved' && program.entrance_exam_requirement_status == false
-      program.curriculums.where(curriculum_version:, active_status: 'active').last.curriculum_course_offerings
-                         .where(batch:).first.course_offering_courses.where(year:, semester:).order('year ASC', 'semester ASC').each do |course_offering_course|
+      program.curriculums.where(curriculum_version: curriculum_version, active_status: 'active').last.curriculum_course_offerings
+                         .where(batch: batch).first.course_offering_courses.where(year: year, semester: semester).order('year ASC', 'semester ASC').each do |course_offering_course|
         StudentCourse.create do |student_course|
           student_course.student_id = id
           student_course.course_id = course_offering_course.course_id
@@ -348,8 +348,8 @@ class Student < ApplicationRecord
         end
       end
     elsif student_courses.empty? && program.entrance_exam_requirement_status == true && document_verification_status == 'approved' && entrance_exam_result_status == 'Pass'
-      program.curriculums.where(curriculum_version:, active_status: 'active').last.curriculum_course_offerings
-                         .where(batch:).first.course_offering_courses.where(year:, semester:).order('year ASC', 'semester ASC').each do |course_offering_course|
+      program.curriculums.where(curriculum_version: curriculum_version, active_status: 'active').last.curriculum_course_offerings
+                         .where(batch: batch).first.course_offering_courses.where(year: year, semester: semester).order('year ASC', 'semester ASC').each do |course_offering_course|
         StudentCourse.create do |student_course|
           student_course.student_id = id
           student_course.course_id = course_offering_course.course_id

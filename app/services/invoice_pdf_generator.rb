@@ -26,9 +26,9 @@ class InvoicePdfGenerator
       @document.text "Golden State College", size: 28, style: :bold, align: :center
       @document.move_down 10
       @document.text "Invoice", size: 16, style: :bold, align: :center
-      @document.text "JEMO, Addis Ababa, Ethiopia", size: 12, align: :center
-      @document.text "Phone: (+251)118325993", size: 12, align: :center
-      @document.text "Email: info@Golden State College.edu.et", size: 12, align: :center
+      @document.text "Furi, Alem Gena, Sheger City, Oromia, Ethiopia", size: 12, align: :center
+      @document.text "Phone: +251 11 380 5016, +251 911 383795", size: 12, align: :center
+      @document.text "Email: info@goldenstatecollege.edu.et", size: 12, align: :center
       @document.move_down 30
     end
   

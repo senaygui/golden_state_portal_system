@@ -79,7 +79,7 @@
               </thead>
               <tbody>
                 <% current_student.program.curriculums.where(active_status: 'active').first.curriculum_course_offerings
-                         .where(batch:).first.course_offering_courses.where(year:, semester:).order('year ASC', 'semester ASC').each do |course_offering_course| %>
+                         .where(batch: current_student.batch).first.course_offering_courses.where(year: current_student.year, semester: current_student.semester).order('year ASC', 'semester ASC').each do |course_offering_course| %>
                   <tr>
                     <td><%= course_offering_course.course.course_title %></td>
                     <td><%= course_offering_course.course.course_module.module_code %></td>
