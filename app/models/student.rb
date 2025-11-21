@@ -289,7 +289,6 @@ class Student < ApplicationRecord
 
       if academic_calendar.present?
         update_columns(
-          batch: academic_calendar.batch,
           academic_calendar_id: academic_calendar.id,
           department_id: program.department_id,
           admission_type: program.admission_type,
