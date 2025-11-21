@@ -87,7 +87,7 @@ ActiveAdmin.register AcademicCalendar do
                 '2027/2028',
                 '2028/2029',
                 '2029/2030'
-              ], include_blank: true
+              ], include_blank: true, required: true
       f.input :remark
       f.input :created_at, as: :date_time_picker
       if f.object.new_record?

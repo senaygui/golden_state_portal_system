@@ -41,9 +41,9 @@ class PagesController < ApplicationController
   end
 
   def enrollement
-    @total_course = current_student.get_current_courses.select do |course|
-      passed_all_prerequisites?(current_student, course) &&
-        !current_student.course_exemptions.where(exemption_approval: 'Approved').exists?(course_id: course.id)
+    @total_course = current_student.get_current_courses.select do |course_offering|
+      passed_all_prerequisites?(current_student, course_offering.course) &&
+        !current_student.course_exemptions.where(exemption_approval: 'Approved').exists?(course_id: course_offering.course.id)
     end
     # @total_course = current_student.get_current_courses
     @registration_fee = current_student.get_registration_fee
