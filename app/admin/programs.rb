@@ -64,10 +64,10 @@ ActiveAdmin.register Program do
                               order_by: 'id_asc'
       f.input :study_level, as: :select, collection: %w[undergraduate graduate TVET], include_blank: false
       f.input :admission_type, as: :select, collection: %w[online regular extention distance],
-                               include_blank: false
+                               include_blank: false, label: 'Modality'
       f.input :program_duration, as: :select, collection: [1, 2, 3, 4, 5, 6, 7], include_blank: false,
-                                 label: 'program year'
-      f.input :program_semester, as: :select, collection: [1, 2, 3, 4], include_blank: false
+                                 label: 'Program Duration (years)'
+      f.input :program_semester, as: :select, collection: [1, 2, 3, 4], include_blank: false, label: 'Semesters per year'
       # f.input :monthly_price
       # f.input :full_semester_price
       # f.input :two_monthly_price
