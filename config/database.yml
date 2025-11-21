@@ -88,6 +88,6 @@ test:
 #
 production:
   <<: *default
-  database: heuc_system_production
+  database: portal_system_production
   username: portal_system
   password: <%= ENV['PORTAL_SYSTEM_DATABASE_PASSWORD'] %>
