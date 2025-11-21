@@ -76,7 +76,7 @@ ActiveAdmin.register Student, as: 'ExternalTransferStudent' do
          if program_name.blank?
            puts "Warning: 'NameofProgram' is blank for student_id: #{row[student_id_index]}"
          else
-           program = Program.find_by(program_name:)
+           program = Program.find_by({ program_name: program_name })
            if program
              external_transfer_student.program_id = program.id # Assign program_id if found
            else
@@ -134,13 +134,13 @@ ActiveAdmin.register Student, as: 'ExternalTransferStudent' do
       serial += 1
     end
     column 'Name Of HEI' do
-      'Hope Enterprise University College'
+      'Golden State College'
     end
     column 'Campus' do
-      'Hope Lebu'
+      'Furi, Alem Gena, Sheger City'
     end
     column 'Location/Town' do
-      'Addis Ababa'
+      'Oromia'
     end
     column('Name of Program') { |external_transfer_student| external_transfer_student.program&.program_name }
     column('Modality', &:admission_type)

@@ -50,7 +50,7 @@ permit_params :bank_name,:account_number,:phone_number,:account_type,:payment_me
           if f.object.bank_logo.attached? 
             image_tag(f.object.bank_logo,resize: '100x100',class: "profile-user-img img-responsive img-circle", id: "imagePreview")
           else
-            image_tag("bank-logo.png",class: "profile-user-img img-responsive img-circle", id: "imagePreview")
+            image_tag("bank-logo-golden.jpg",class: "profile-user-img img-responsive img-circle", id: "imagePreview")
           end
         end
       end

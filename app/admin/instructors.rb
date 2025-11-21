@@ -21,13 +21,13 @@ ActiveAdmin.register AdminUser, as: 'instructor' do
       serial += 1
     end
     column 'Name Of HEI' do
-      'Hope Enterprise University College'
+      'Golden State College'
     end
     column 'Campus' do
-      'Hope Lebu'
+      'furi '
     end
     column 'Location/Town' do
-      'Addis Ababa'
+      'oromia'
     end
     column('Name of Department') { |instructor| instructor.department&.department_name }
     column('First Name', &:first_name)

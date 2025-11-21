@@ -78,7 +78,7 @@ ActiveAdmin.register Student do
   collection_action :export_registrar_stat_csv, method: :get do
        csv_data = CSV.generate(headers: true) do |csv|
          # Header row
-         csv << ['Hope Enterprise University College/Office of the Registrar Statistics for Regular and Extension Students']
+         csv << ['Golden State College/Office of the Registrar Statistics for Regular and Extension Students']
 
          # Sub-header row for columns
          header_row = ['Program Type', 'Program']
@@ -211,13 +211,13 @@ ActiveAdmin.register Student do
       serial += 1
     end
     column 'Name Of HEI' do
-      'Hope Enterprise University College'
+      'Golden State College'
     end
     column 'Campus' do
-      'Hope Lebu'
+      'Furi'
     end
     column 'Location/Town' do
-      'Addis Ababa'
+      'Oromia, Ethiopia'
     end
     column('Name of Program') { |student| student.program&.program_name }
     column('Modality', &:admission_type)

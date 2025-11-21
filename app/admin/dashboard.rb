@@ -498,7 +498,7 @@ ActiveAdmin.register_page 'Dashboard' do
     employment_categories = %w[Part-time Full-time]
 
     csv_data = CSV.generate(headers: true) do |csv|
-      csv << ['Hope Enterprise University College']
+      csv << ['Golden State College']
       csv << ['Department', 'Total Instructors', 'Male', 'Female'] + achievement_categories + employment_categories
       departments = if params[:department_id].present?
                       Department.where(id: params[:department_id])

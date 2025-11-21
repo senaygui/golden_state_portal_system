@@ -97,7 +97,7 @@ t
   });
 
   $(document).ready(function() {
-    $('#header').before("<div class='headline'><div class='banner-logo'></div> <h1 class='banner-title'> HEUC Registrar Portal</h1></div>");
+    $('#header').before("<div class='headline'><div class='banner-logo'></div> <h1 class='banner-title'> Golden State College Registrar Portal</h1></div>");
   });
 
 

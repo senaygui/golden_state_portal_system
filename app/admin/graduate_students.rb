@@ -26,13 +26,13 @@ ActiveAdmin.register Student, as: 'GraduateStudent' do
       serial += 1
     end
     column 'Name Of HEI' do
-      'Hope Enterprise University College'
+      'Golden State College'
     end
     column 'Campus' do
-      'Hope Lebu'
+      'Furi'
     end
     column 'Location/Town' do
-      'Addis Ababa'
+      'Oromia, Ethiopia'
     end
     column('Name of Program') { |student| student.program&.program_name }
     column('Modality', &:admission_type)
